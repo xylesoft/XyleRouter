@@ -5,21 +5,22 @@ Purpose
 -------
 
 A routing component to allow you to create a routing table which encompasses the following abilities:
-	* Groups
 
-	* Callback for match/unmatch based on tokens which must match data
+* Groups
 
-	* Cutting of URLs
+* Callback for match/unmatch based on tokens which must match data
 
-	* Defaulting of request values
+* Cutting of URLs
 
-	* Matching of request headers
+* Defaulting of request values
 
-	* URL matching with REGEX
+* Matching of request headers
 
-	* Tree structure which allows for easy configuration interpretations to be implemented
+* URL matching with REGEX
 
-	* Interfaces to implement your own moduling/controller calling.
+* Tree structure which allows for easy configuration interpretations to be implemented
+
+* Interfaces to implement your own moduling/controller calling.
 
 Influence
 ---------
