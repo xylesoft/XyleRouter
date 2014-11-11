@@ -7,7 +7,7 @@ use Xylesoft\XyleRouter\Interfaces\RequestInterface;
 /**
  * Class Route
  *
- * Route aggregate root for
+ * A single route definition class.
  *
  * @package Xylesoft\XyleRouter
  */
@@ -52,7 +52,7 @@ class Route {
     /**
      * @var bool
      */
-    protected $stop = false;
+    protected $stop = true;
 
     /**
      * @var bool
@@ -66,17 +66,6 @@ class Route {
 
         $this->router = $router;
         $this->routePattern = $routePattern;
-    }
-
-    /**
-     * preg_match REGEX of the route
-     *
-     * @param $url
-     * @return bool
-     */
-    public function match($url) {
-
-        return false;
     }
 
     /**
@@ -160,10 +149,15 @@ class Route {
         return $this;
     }
 
+    /**
+     * preg_match REGEX of the route
+     *
+     * @param $url
+     * @return bool
+     */
     public function match(RequestInterface $request) {
 
         $url = $request->getUrl();
-
     }
 
     /************************************
