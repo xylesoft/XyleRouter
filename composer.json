@@ -1,0 +1,23 @@
+{
+    "name": "xylesoft/xylerouting",
+    "description": "A routing component",
+    "require": {
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.3"
+    },
+    "authors": [
+        {
+            "name": "Jeramy Wenserit",
+            "email": "jeramy@xylesoft.co.uk"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Xylesoft\\XyleRouter": "./src"
+        },
+        "psr-4": {
+            "Tests\\": "./tests"
+        }
+    }
+}
