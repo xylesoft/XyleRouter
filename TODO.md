@@ -20,6 +20,7 @@ Todo for XyleRouter
     [ ] RouteSource class which acts like the Route class.
     [ ] Url Matcher class
     [ ] Finite State machine for parsing route patterns (PatternParser)
+    [ ] Scrutinize the $router being passed to the Route class. Possibly remove.
 
 0.2.0
 -----
@@ -36,6 +37,7 @@ Todo for XyleRouter
 
     [ ] On callback based routes, break down the REGEX into smaller parts, so partial comparisons can be performed without having
         to call the callback method (potentially Database or more complex code)
+    [ ] Abstrac the Router fluent interface.
 
 1.0.0
 -----
