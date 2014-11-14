@@ -67,7 +67,38 @@ class Route implements RouteInterface {
     public function __construct($routePattern, Router $router) {
 
         $this->router = $router;
-        $this->routePattern = $routePattern;
+        $this->routePattern = $this->parse($routePattern);
+    }
+
+    /**
+     * Responsible with converting the incoming route into a preg_* compatible regular expression.
+     *
+     * @param string $pattern
+     * @return string
+     */
+    private function parse($pattern) {
+
+        $parameters = $optionalParameters = [];
+
+        // Extract the simple '(token:pattern)' parameters and turn into valid REGEX.
+        if (preg_match('#\([a-zA-Z0-9]+:#', $pattern)) {
+            preg_match_all('#\([a-zA-Z0-9]+:[^{^}]+\)#', $pattern, $parameters);
+
+            if (count($parameters) === 0) {
+                throw new \InvalidArgumentException(sprintf('One or more route parameter patterns (token:regex) is invalid: %s', $pattern));
+            }
+        }
+
+        // Extract the optional '{(token:pattern)}' parameters and turn into valid REGEX.
+        if (preg_match('#{#', $pattern)) {
+            preg_match_all('#{.+\(\s+:.+\).+}#', $pattern, $optionalParameters);
+
+            if (count($optionalParameters) === 0) {
+                throw new \InvalidArgumentException(sprintf('One or more optional route Patterns {(token:regex)} is invalid: %s', $pattern));
+            }
+        }
+
+        return '#' . $pattern . '#';
     }
 
     /**
@@ -155,11 +186,14 @@ class Route implements RouteInterface {
      * preg_match REGEX of the route
      *
      * @param $url
-     * @return bool
+     * @return RouteInterface|bool
      */
     public function match(RequestInterface $request) {
 
         $url = $request->getUrl();
+        $pattern = $this->getRoutePattern();
+
+        return (preg_match($pattern, $url)) ? $this : false;
     }
 
     /************************************

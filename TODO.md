@@ -16,7 +16,10 @@ Todo for XyleRouter
         [x] MatchInterface (for callbacks.)
         [x] RouteInterface (for creating other route classes which match other data, not just URLS, e.g. sources)
         [ ] MatchedRouteInterface (for when a route has been matched, the returned container by Router->dispatch())
+        [ ] UrlMatcherInterface
     [ ] RouteSource class which acts like the Route class.
+    [ ] Url Matcher class
+    [ ] Finite State machine for parsing route patterns (PatternParser)
 
 0.2.0
 -----
@@ -25,6 +28,7 @@ Todo for XyleRouter
     [ ] Grouping
     [ ] Composite Pattern for definition to allow for grouping
     [ ] Implying of routes
+    [ ] Treversable route table (using Treversable interface)
 
 
 0.3.0

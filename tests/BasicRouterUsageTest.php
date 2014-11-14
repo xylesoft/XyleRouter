@@ -36,7 +36,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
         $routes = $router->getRoutes();
         $this->assertCount(1, $routes);
         $this->assertEquals('index.page', $routes[0]->getName());
-        $this->assertEquals('^/hello/(category:[a-zA-Z\-0-9]+){/(age:\d+)}$', $routes[0]->getRoutePattern());
+        $this->assertEquals('#^/hello/(category:[a-zA-Z\-0-9]+){/(age:\d+)}$#', $routes[0]->getRoutePattern());
         $this->assertInstanceOf('\Closure', $routes[0]->getHandler());
         $this->assertEquals(['GET'], $routes[0]->getMethods());
         $this->assertInstanceOf('\Tests\stubs\TokensCallback', $routes[0]->getCallback());
@@ -54,24 +54,26 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
         $result = $router->dispatch(
             new DummyRequest('/hello')
         );
-        $this->assertEquals(false, $result);
+        $this->assertEquals(false, $result, "Invalid route didn't return false.");
 
         // Invalid Route with parameter
         $result = $router->dispatch(
             new DummyRequest('/goodbye/cats')
         );
-        $this->assertEquals(false, $result);
+        $this->assertEquals(false, $result, "Invalid route with parameter didn't return false");
 
         // Valid route without optional parameter
         $result = $router->dispatch(
             new DummyRequest('/hello/cats')
         );
-        $this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+        $this->assertNotFalse($result);
+        $this->assertArrayHasKey('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid simple route didn't return RouteInterface");
 
         // Validate route with optional parameter
         $result = $router->dispatch(
             new DummyRequest('/goodbye/cats/5')
         );
-        $this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+        $this->assertNotFalse($result);
+        $this->assertArrayHasKey('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid parameter route didn't return RouteInterface");
     }
 }

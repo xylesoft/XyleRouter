@@ -75,7 +75,7 @@ interface RouteInterface {
      * preg_match REGEX of the route
      *
      * @param $url
-     * @return bool
+     * @return RouteInterface|bool
      */
     public function match(RequestInterface $request);
 
