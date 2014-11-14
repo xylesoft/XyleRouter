@@ -29,7 +29,7 @@ Todo for XyleRouter
     [ ] Composite Pattern for definition to allow for grouping
     [ ] Implying of routes
     [ ] Treversable route table (using Treversable interface)
-
+    [ ] Replace ->route() ->group() ->header() with ->onUrl(), ->onUrlGroup() and ->onHeader() -- Think over.
 
 0.3.0
 -----
