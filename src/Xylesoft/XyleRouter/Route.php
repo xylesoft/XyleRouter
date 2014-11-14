@@ -1,8 +1,10 @@
 <?php
 
 namespace Xylesoft\XyleRouter;
+
 use Xylesoft\XyleRouter\Interfaces\MatchInterface;
 use Xylesoft\XyleRouter\Interfaces\RequestInterface;
+use Xylesoft\XyleRouter\Interfaces\RouteInterface;
 
 /**
  * Class Route
@@ -11,7 +13,7 @@ use Xylesoft\XyleRouter\Interfaces\RequestInterface;
  *
  * @package Xylesoft\XyleRouter
  */
-class Route {
+class Route implements RouteInterface {
 
     /**
      * @var Router
@@ -19,7 +21,7 @@ class Route {
     private $router;
 
     /**
-     * @var str9ing
+     * @var string
      */
     private $routePattern;
 

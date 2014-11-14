@@ -13,13 +13,24 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 
     public function testRouterClassLoad() {
 
-        $router = new Router();
-
+        $router = new Router('\Xylesoft\XyleRouter\Route');
         $this->assertInstanceOf('\Xylesoft\XyleRouter\Router', $router);
     }
 
+    /**
+     * @expectedException \RuntimeException
+     * @depends testRouterClassLoad
+     */
+    public function testRouteImplementationCheck() {
+
+        $router = new Router('\Tests\stubs\FakeRoute');
+    }
+
+    /**
+     * @depends testRouterClassLoad
+     */
     public function testDefinition() {
-        $router = new Router();
+        $router = new Router('\Xylesoft\XyleRouter\Route');
         $router->initialize(__DIR__ . '/stubs/routes.php');
 
         $routes = $router->getRoutes();
@@ -32,8 +43,11 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(['age'=>32], $routes[0]->getDefaults());
     }
 
+    /**
+     * @depends testDefinition
+     */
     public function testMatching() {
-        $router = new Router();
+        $router = new Router('\Xylesoft\XyleRouter\Route');
         $router->initialize(__DIR__ . '/stubs/routes.php');
 
         // Invalid Route

@@ -14,7 +14,7 @@ Todo for XyleRouter
     [ ] Contracts.
         [x] RequestInterface (wrapper for getting data from the implemented request)
         [x] MatchInterface (for callbacks.)
-        [ ] RouteInterface (for creating other route classes which match other data, not just URLS, e.g. sources)
+        [x] RouteInterface (for creating other route classes which match other data, not just URLS, e.g. sources)
         [ ] MatchedRouteInterface (for when a route has been matched, the returned container by Router->dispatch())
     [ ] RouteSource class which acts like the Route class.
 
@@ -24,6 +24,7 @@ Todo for XyleRouter
     [ ] Route generator
     [ ] Grouping
     [ ] Composite Pattern for definition to allow for grouping
+    [ ] Implying of routes
 
 
 0.3.0
@@ -35,4 +36,5 @@ Todo for XyleRouter
 1.0.0
 -----
 
-    [ ] Serialized route defintion
+    [ ] Serialized route defintion.
+    [ ] Extensive tests of a large selection of URLs and headers.

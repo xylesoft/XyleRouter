@@ -26,3 +26,8 @@ Influence
 ---------
 
 This routing implementation is heavily based upon the AgaviRouter (https://github.com/agavi/agavi) for inspiration.
+
+Dependancy
+----------
+
+PHP >= 5.1.0
