@@ -15,22 +15,30 @@ use Xylesoft\XyleRouter\Interfaces\RouteInterface;
  */
 class Route implements RouteInterface {
 
-    /**
-     * @var Router
-     */
-    private $router;
-
-    /**
+	/**
+	 * The current route pattern.
+	 *
      * @var string
      */
     private $routePattern;
 
+	/**
+	 * The current route as a full regular expression.
+	 *
+	 * @var string
+	 */
+	private $regexPattern;
+
     /**
+     * The allowed HTTP methods for the current route.
+     *
      * @var array
      */
     protected $methods;
 
     /**
+     * The handler of a successfully matched and stopped route.
+     *
      * @var \Closure
      */
     protected $handler;
@@ -42,32 +50,54 @@ class Route implements RouteInterface {
 
 
     /**
-     * @var string  Unique name of the route.
+     * Unique name of the route.
+     *
+     * @var string
      */
     protected $name;
 
     /**
+     * The default value to be interpolated into a token if the token isn't provided a value.
+     *
      * @var array
      */
     protected $defaults;
 
     /**
+     * Whether to stop on this route if match was successful or not.
+     *
      * @var bool
      */
     protected $stop = true;
 
     /**
+     * Strip out the current route pattern before allowing the routing request to move to the next route check.
+     *
      * @var bool
      */
     protected $cut = false;
 
+
+	/**
+	 * Array of tokens and the rules which apply to the token.
+	 *
+	 * @var array
+	 */
+	protected $tokens = [];
+
+	/**
+	 * Tokens which are considered optional in the pattern.
+	 *
+	 * @var array
+	 */
+	protected $optionalTokens = [];
+
     /**
      * @param Router $router
      */
-    public function __construct($routePattern, Router $router) {
+    public function __construct($routePattern) {
 
-        $this->router = $router;
-        $this->routePattern = $this->parse($routePattern);
+        $this->routePattern = $routePattern;
     }
 
     /**
@@ -79,24 +109,29 @@ class Route implements RouteInterface {
     private function parse($pattern) {
 
         $parameters = $optionalParameters = [];
+//
+//        // Extract the simple '(token:pattern)' parameters and turn into valid REGEX.
+//        if (preg_match('#\([a-zA-Z0-9]+:#', $pattern)) {
+//            preg_match_all('#\([a-zA-Z0-9]+:[^{^}]+\)#', $pattern, $parameters);
+//
+//            if (count($parameters) === 0) {
+//                throw new \InvalidArgumentException(sprintf('One or more route parameter patterns (token:regex) is invalid: %s', $pattern));
+//            }
+//        }
+//
+//        // Extract the optional '{(token:pattern)}' parameters and turn into valid REGEX.
+//        if (preg_match('#{#', $pattern)) {
+//            preg_match_all('#{.+\(\s+:.+\).+}#', $pattern, $optionalParameters);
+//
+//            if (count($optionalParameters) === 0) {
+//                throw new \InvalidArgumentException(sprintf('One or more optional route Patterns {(token:regex)} is invalid: %s', $pattern));
+//            }
+//        }
 
-        // Extract the simple '(token:pattern)' parameters and turn into valid REGEX.
-        if (preg_match('#\([a-zA-Z0-9]+:#', $pattern)) {
-            preg_match_all('#\([a-zA-Z0-9]+:[^{^}]+\)#', $pattern, $parameters);
+	    // Get all {xxx} tokens.
+	    if (preg_match('#{\S+?\(?[a-zA-Z0-9]+\)?\S+?}#', $pattern)) {
 
-            if (count($parameters) === 0) {
-                throw new \InvalidArgumentException(sprintf('One or more route parameter patterns (token:regex) is invalid: %s', $pattern));
-            }
-        }
-
-        // Extract the optional '{(token:pattern)}' parameters and turn into valid REGEX.
-        if (preg_match('#{#', $pattern)) {
-            preg_match_all('#{.+\(\s+:.+\).+}#', $pattern, $optionalParameters);
-
-            if (count($optionalParameters) === 0) {
-                throw new \InvalidArgumentException(sprintf('One or more optional route Patterns {(token:regex)} is invalid: %s', $pattern));
-            }
-        }
+	    }
 
         return '#' . $pattern . '#';
     }
@@ -141,20 +176,11 @@ class Route implements RouteInterface {
     /**
      * Default values for tokens in a URL if the value isn't present
      *
-     * @param array $defaults
+     * @param array $defaults   ['pattern token'=>'value', ...]
      */
     public function defaults(array $defaults) {
 
-        $this->defaults  = $defaults;
-        return $this;
-    }
-
-    /**
-     * @param \Xylesoft\XyleRouter\Interfaces\MatchInterface $callback
-     */
-    public function callback(MatchInterface $callback) {
-
-        $this->callback = $callback;
+        $this->defaults = $defaults;
         return $this;
     }
 
@@ -190,23 +216,35 @@ class Route implements RouteInterface {
      */
     public function match(RequestInterface $request) {
 
+	    if (! $this->regexPattern) {
+		    $this->regexPattern = $this->parse($this->routePattern);
+	    }
+
         $url = $request->getUrl();
         $pattern = $this->getRoutePattern();
 
         return (preg_match($pattern, $url)) ? $this : false;
     }
 
-    /************************************
+	/**
+	 * Method for adding conditions to the tokens in a route pattern.
+	 *
+	 * @param string $token The name of the token in the route pattern.
+	 * @param bool $optional Whether the token is optional or not, default: false
+	 * @param MatchInterface $matcher A match class
+	 * @return bool                     Whether the match was successful or not.
+	 */
+	public function where($token, $optional = false, MatchInterface $matcher) {
+
+		$this->tokens[$token] = $matcher;
+		if ($optional) {
+			$this->optionalTokens[] = $token;
+		}
+	}
+
+	/************************************
      * GETTER METHODS
      ************************************/
-
-    /**
-     * @return \Xylesoft\XyleRouter\Interfaces\MatchInterface
-     */
-    public function getCallback()
-    {
-        return $this->callback;
-    }
 
     /**
      * @return mixed

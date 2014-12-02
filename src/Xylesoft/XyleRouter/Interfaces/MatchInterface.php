@@ -3,13 +3,13 @@
 namespace Xylesoft\XyleRouter\Interfaces;
 
 /**
- * Interface MatchInterface
+ * Interface TokenMatcherInterface
  *
- * Callback interface for matching routes with dynamic tokens.
+ * Callback interface for matching a token in a route.
  *
  * @package Xylesoft\XyleRouter\Interfaces
  */
-interface MatchInterface {
+interface TokenMatcherInterface {
 
 
     /**
@@ -18,6 +18,14 @@ interface MatchInterface {
      *
      * @return bool
      */
-    public function match(array $parameters, RequestInterface $request);
+    public function match($name, $value, RequestInterface $request);
+
+
+	/**
+	 * The Regular expression pattern to be used to initially match the token.
+	 *
+	 * @return string
+	 */
+	public function getPattern();
 
 }

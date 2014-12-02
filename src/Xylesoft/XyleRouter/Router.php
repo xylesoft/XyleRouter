@@ -100,7 +100,7 @@ class Router {
     public function route($regex) {
 
         $routeClass = $this->routeClassNamespace;
-        $route = new $routeClass($regex, $this);
+        $route = new $routeClass($regex);
 
         if (! $route instanceof RouteInterface) {
             throw new \RuntimeException('Route class does not implement \Xylesoft\XyleRouter\Interfaces\RouteInterface');
@@ -121,6 +121,8 @@ class Router {
     public function dispatch(RequestInterface $request) {
 
         $nonStoppedMatches = [];
+
+	    // @TODO Use immutable request type object for running the route matching chain, so the path can be manipulated.
 
         foreach ($this->routes as $route) {
 

@@ -17,7 +17,7 @@ interface RouteInterface {
      * @param string $routePattern
      * @param Router $router
      */
-    public function __construct($routePattern, Router $router);
+    public function __construct($routePattern);
 
     /**
      * The allowed HTTP methods.
@@ -51,11 +51,6 @@ interface RouteInterface {
     public function defaults(array $defaults);
 
     /**
-     * @param \Xylesoft\XyleRouter\Interfaces\MatchInterface $callback
-     */
-    public function callback(MatchInterface $callback);
-
-    /**
      * Whether the route stops here or carries on matching.
      *
      * @param $polarity
@@ -79,10 +74,15 @@ interface RouteInterface {
      */
     public function match(RequestInterface $request);
 
-    /**
-     * @return \Xylesoft\XyleRouter\Interfaces\MatchInterface
-     */
-    public function getCallback();
+	/**
+	 * Method for adding conditions to the tokens in a route pattern.
+	 *
+	 * @param string $token             The name of the token in the route pattern.
+	 * @param bool $optional            Whether the token is optional or not, default: false
+	 * @param MatchInterface $matcher   A match class
+	 * @return bool                     Whether the match was successful or not.
+	 */
+	public function where($token, $optional = false, MatchInterface $matcher);
 
     /**
      * @return \Closure
@@ -103,11 +103,6 @@ interface RouteInterface {
      * @return string
      */
     public function getRoutePattern();
-
-    /**
-     * @return array
-     */
-    public function getDefaults();
 
     /**
      * @return boolean
