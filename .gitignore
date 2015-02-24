@@ -2,3 +2,4 @@
 composer.lock
 coverage.clover
 .idea/
+.DS_Store
