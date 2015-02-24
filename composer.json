@@ -14,10 +14,10 @@
     ],
     "autoload": {
         "psr-0": {
-            "Xylesoft\\XyleRouter": "./src"
         },
         "psr-4": {
-            "Tests\\": "./tests"
+            "Tests\\": "./tests",
+            "Xylesoft\\XyleRouter\\": "./src"
         }
     }
 }
