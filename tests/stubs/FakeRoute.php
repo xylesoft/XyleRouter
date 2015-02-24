@@ -2,4 +2,6 @@
 
 namespace Tests\stubs;
 
-class FakeRoute {}
+class FakeRoute
+{
+}

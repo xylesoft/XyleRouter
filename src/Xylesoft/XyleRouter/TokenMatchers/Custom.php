@@ -2,6 +2,6 @@
 
 namespace Xylesoft\XyleRouter\TokenMatchers;
 
-class Custom {
-
-} 
+class Custom
+{
+}

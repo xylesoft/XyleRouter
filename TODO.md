@@ -29,15 +29,17 @@ Todo for XyleRouter
     [ ] Grouping
     [ ] Composite Pattern for definition to allow for grouping
     [ ] Implying of routes
-    [ ] Treversable route table (using Treversable interface)
+    [ ] Traversable route table (using Traversable interface)
     [ ] Replace ->route() ->group() ->header() with ->onUrl(), ->onUrlGroup() and ->onHeader() -- Think over.
+    [ ] Modifiers on Route Generator. For example, ->gen('articles.list*') will attempt to generate the route with current available request parameters.  
 
 0.3.0
 -----
 
     [ ] On callback based routes, break down the REGEX into smaller parts, so partial comparisons can be performed without having
         to call the callback method (potentially Database or more complex code)
-    [ ] Abstrac the Router fluent interface.
+    [ ] Abstract the Router fluent interface.
+
 
 1.0.0
 -----

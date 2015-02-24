@@ -6,12 +6,10 @@ use Xylesoft\XyleRouter\Interfaces\RequestInterface;
 use Xylesoft\XyleRouter\Interfaces\RouteInterface;
 
 /**
- * Class Router
- * @package Xylesoft\XyleRouter
+ * Class Router.
  */
-class Router {
-
-
+class Router
+{
 //    /**
 //     * @var \Xylesoft\XyleRouter\Interfaces\RequestInterface
 //     */
@@ -29,13 +27,12 @@ class Router {
      */
     protected $routes;
 
-
     /**
-     * @param string $routeClassNamespace   The fully qualified namespace of a route class which
-     *                                      implements \Xylesoft\XyleRouter\Interfaces\RouteInterface.
+     * @param string $routeClassNamespace The fully qualified namespace of a route class which
+     *                                    implements \Xylesoft\XyleRouter\Interfaces\RouteInterface.
      */
-    public function __construct($routeClassNamespace) {
-
+    public function __construct($routeClassNamespace)
+    {
         $this->routeClassNamespace = $routeClassNamespace;
 
         // Make sure the provided route class implements the required interface.
@@ -56,18 +53,18 @@ class Router {
      *
      * @param string $definitionFile
      */
-    public function initialize($definitionFile) {
-
+    public function initialize($definitionFile)
+    {
         if (! file_exists($definitionFile)) {
 
             // No definition path found
-            throw new \InvalidArgumentException('Route definition not found: ' . $definitionFile);
+            throw new \InvalidArgumentException('Route definition not found: '.$definitionFile);
         }
 
         if (! is_readable($definitionFile)) {
 
             // No definition path found
-            throw new \InvalidArgumentException('Route definition file is unreadable: ' . $definitionFile);
+            throw new \InvalidArgumentException('Route definition file is unreadable: '.$definitionFile);
         }
 
         $router = $this;
@@ -79,8 +76,8 @@ class Router {
      *
      * @return array
      */
-    public function getRoutes() {
-
+    public function getRoutes()
+    {
         return $this->routes;
     }
 
@@ -95,10 +92,11 @@ class Router {
      * Define a new route.
      *
      * @param $regex
+     *
      * @return Route
      */
-    public function route($regex) {
-
+    public function route($regex)
+    {
         $routeClass = $this->routeClassNamespace;
         $route = new $routeClass($regex);
 
@@ -111,23 +109,21 @@ class Router {
         return $route;
     }
 
-
     /**
      * Attempt to match a route.
      *
      * @param RequestInterface $request
+     *
      * @return \Xylesoft\XyleRouter\Interfaces\RouteInterface|false
      */
-    public function dispatch(RequestInterface $request) {
-
+    public function dispatch(RequestInterface $request)
+    {
         $nonStoppedMatches = [];
 
-	    // @TODO Use immutable request type object for running the route matching chain, so the path can be manipulated.
+        // @TODO Use immutable request type object for running the route matching chain, so the path can be manipulated.
 
         foreach ($this->routes as $route) {
-
             if ($match = $route->match($request)) {
-
                 if ($match->getStop() === true) {
 
                     // We've found our route.
@@ -137,7 +133,6 @@ class Router {
                     // Carry on, but preserve the information aquired from the non-stop route.
                     $nonStoppedMatches[] = $match;
                 }
-
             }
         }
 

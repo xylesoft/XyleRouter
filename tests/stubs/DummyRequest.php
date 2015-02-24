@@ -2,22 +2,23 @@
 
 namespace Tests\stubs;
 
-use \Xylesoft\XyleRouter\Interfaces\RequestInterface;
+use Xylesoft\XyleRouter\Interfaces\RequestInterface;
 
-class DummyRequest implements RequestInterface {
-
+class DummyRequest implements RequestInterface
+{
     private $parameters = [
         'year' => '1982',
-        'name' => 'aDummy'
+        'name' => 'aDummy',
     ];
 
     private $headers = [
-        'accept' => 'application/json'
+        'accept' => 'application/json',
     ];
 
     private $url;
 
-    public function __construct($url) {
+    public function __construct($url)
+    {
         $this->url = $url;
     }
 
@@ -32,7 +33,7 @@ class DummyRequest implements RequestInterface {
     }
 
     /**
-     * Get the GET parameters from the Request
+     * Get the GET parameters from the Request.
      *
      * @return array
      */
@@ -42,9 +43,10 @@ class DummyRequest implements RequestInterface {
     }
 
     /**
-     * Get a single GET parameter from the request
+     * Get a single GET parameter from the request.
      *
      * @param string $name
+     *
      * @return mixed
      */
     public function getParameter($name)
@@ -53,7 +55,7 @@ class DummyRequest implements RequestInterface {
     }
 
     /**
-     * Get all the request Headers
+     * Get all the request Headers.
      *
      * @return array
      */
@@ -64,7 +66,7 @@ class DummyRequest implements RequestInterface {
 
     /**
      * @param string $name
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function setParameter($name, $value)
     {

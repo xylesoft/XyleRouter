@@ -4,12 +4,12 @@ namespace Xylesoft\XyleRouter\TokenMatchers;
 
 use Xylesoft\XyleRouter\Interfaces\TokenMatcherInterface;
 
-abstract class Base implements TokenMatcherInterface {
+abstract class Base implements TokenMatcherInterface
+{
+    protected $options = [];
 
-	protected $options = [];
-
-	public function __construct(array $options = []) {
-
-		$this->options = array_merge($this->options, $options);
-	}
-} 
+    public function __construct(array $options = [])
+    {
+        $this->options = array_merge($this->options, $options);
+    }
+}

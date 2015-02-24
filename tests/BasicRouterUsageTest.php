@@ -5,14 +5,14 @@ use Tests\stubs\DummyRequest;
 use Tests\stubs\TokensCallback;
 
 /**
- * Class TestRouter
+ * Class TestRouter.
  *
  * Testing the Xylesoft\XyleRouter\Router
  */
-class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
-
-    public function testRouterClassLoad() {
-
+class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
+{
+    public function testRouterClassLoad()
+    {
         $router = new Router('\Xylesoft\XyleRouter\Route');
         $this->assertInstanceOf('\Xylesoft\XyleRouter\Router', $router);
     }
@@ -21,17 +21,18 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
      * @expectedException \RuntimeException
      * @depends testRouterClassLoad
      */
-    public function testRouteImplementationCheck() {
-
+    public function testRouteImplementationCheck()
+    {
         $router = new Router('\Tests\stubs\FakeRoute');
     }
 
     /**
      * @depends testRouterClassLoad
      */
-    public function testDefinition() {
+    public function testDefinition()
+    {
         $router = new Router('\Xylesoft\XyleRouter\Route');
-        $router->initialize(__DIR__ . '/stubs/routes.php');
+        $router->initialize(__DIR__.'/stubs/routes.php');
 
         $routes = $router->getRoutes();
         $this->assertCount(1, $routes);
@@ -40,15 +41,16 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
         $this->assertInstanceOf('\Closure', $routes[0]->getHandler());
         $this->assertEquals(['GET'], $routes[0]->getMethods());
         $this->assertInstanceOf('\Tests\stubs\TokensCallback', $routes[0]->getCallback());
-        $this->assertEquals(['age'=>32], $routes[0]->getDefaults());
+        $this->assertEquals(['age' => 32], $routes[0]->getDefaults());
     }
 
     /**
      * @depends testDefinition
      */
-    public function testMatching() {
+    public function testMatching()
+    {
         $router = new Router('\Xylesoft\XyleRouter\Route');
-        $router->initialize(__DIR__ . '/stubs/routes.php');
+        $router->initialize(__DIR__.'/stubs/routes.php');
 
         // Invalid Route
         $result = $router->dispatch(
