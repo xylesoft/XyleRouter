@@ -92,5 +92,23 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         );
         $this->assertFalse($result, 'test failed on /hello/cats/2000 with too high age parameter.');
 
+        // Check if parameters are set onto request.
+        $req = new DummyRequest('/hello/kittens/20');
+        $result = $router->dispatch($req);
+
+        $this->assertArrayHasKey('category', $req->getParameters());
+        $this->assertArrayHasKey('age', $req->getParameters());
+        $this->assertEquals('kittens', $req->getParameter('category'));
+        $this->assertEquals('20', $req->getParameter('age'));
+
+        // Check if default parameter is populated.
+        $req = new DummyRequest('/hello/kittens');
+        $result = $router->dispatch($req);
+        
+        $this->assertArrayHasKey('category', $req->getParameters());
+        $this->assertArrayHasKey('age', $req->getParameters());
+        $this->assertEquals('kittens', $req->getParameter('category'));
+        $this->assertEquals('32', $req->getParameter('age'));
+
     }
 }

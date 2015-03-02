@@ -275,6 +275,7 @@ class Route implements RouteInterface
             if (count($this->tokens)) {
 
                 foreach ($this->tokens as $tokenName => $tokenMatcher) {
+                    $parameter = "";
                     if (array_key_exists($tokenName, $parameters) && mb_strlen($parameters[$tokenName][0]) > 0) {
 
                         $parameter = $parameters[$tokenName][0];
@@ -292,6 +293,21 @@ class Route implements RouteInterface
                             return false;
                         }
                     }
+
+
+                    // All tests passed. Now time to check whether a default should be put in place?
+                    if (mb_strlen($parameters[$tokenName][0]) == 0 && array_key_exists($tokenName, $this->defaults)) {
+
+                        $default = $this->defaults[$tokenName];
+                        if (preg_match('#\((.+)\)#', $default, $match)) {
+                            $parameter = $match[1];
+                        }
+                    }
+
+
+                    // we can assume parameter is valid and should now be set against
+                    // the request.
+                    $request->setParameter($tokenName, $parameter);
                 }
             }
 
