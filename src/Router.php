@@ -10,11 +10,6 @@ use Xylesoft\XyleRouter\Interfaces\RouteInterface;
  */
 class Router
 {
-//    /**
-//     * @var \Xylesoft\XyleRouter\Interfaces\RequestInterface
-//     */
-//    protected $request;
-
     /**
      * @var string
      */
@@ -30,8 +25,9 @@ class Router
     /**
      * @param string $routeClassNamespace The fully qualified namespace of a route class which
      *                                    implements \Xylesoft\XyleRouter\Interfaces\RouteInterface.
+     * @param string $definitionFile      Optionally initialize the definition during construct.
      */
-    public function __construct($routeClassNamespace)
+    public function __construct($routeClassNamespace, $definitionFile = null)
     {
         $this->routeClassNamespace = $routeClassNamespace;
 
@@ -45,6 +41,10 @@ class Router
                     $this->routeClassNamespace
                 )
             );
+        }
+
+        if ($definitionFile) {
+            $this->initialize($definitionFile);
         }
     }
 
@@ -91,14 +91,17 @@ class Router
     /**
      * Define a new route.
      *
-     * @param $regex
+     * @param string $routePattern   The route pattern.
+     * @param string $name           The unique name of this route.
+     * @param array  $allowedMethods The allowed HTTP methods.
      *
      * @return Route
      */
-    public function route($regex)
+    public function route($routePattern, $name, array $allowedMethods)
     {
         $routeClass = $this->routeClassNamespace;
-        $route = new $routeClass($regex);
+        $route = new $routeClass($routePattern, $name);
+        $route->methods($allowedMethods);
 
         if (! $route instanceof RouteInterface) {
             throw new \RuntimeException('Route class does not implement \Xylesoft\XyleRouter\Interfaces\RouteInterface');
@@ -107,6 +110,82 @@ class Router
         $this->routes[] = $route;
 
         return $route;
+    }
+
+    /**
+     * HTTP GET Route.
+     *
+     * @param string $routePattern The route pattern to match.
+     * @param string $name         The unique name of this route.
+     *
+     * @return Route
+     */
+    public function get($routePattern, $name)
+    {
+        return $this->route($routePattern, $name, ['GET']);
+    }
+
+    /**
+     * HTTP POST Route.
+     *
+     * @param string $routePattern The route pattern to match.
+     * @param string $name         The unique name of this route.
+     *
+     * @return Route
+     */
+    public function post($routePattern, $name)
+    {
+        return $this->route($routePattern, $name, ['POST']);
+    }
+
+    /**
+     * HTTP PUT Route.
+     *
+     * @param string $routePattern The route pattern to match.
+     * @param string $name         The unique name of this route.
+     *
+     * @return Route
+     */
+    public function put($routePattern, $name)
+    {
+        return $this->route($routePattern, $name, ['PUT']);
+    }
+
+    /**
+     * HTTP DELETE Route.
+     *
+     * @param string $routePattern The route pattern to match.
+     * @param string $name         The unique name of this route.
+     *
+     * @return Route
+     */
+    public function delete($routePattern, $name)
+    {
+        return $this->route($routePattern, $name, ['DELETE']);
+    }
+
+    /**
+     * HTTP HEAD Route.
+     *
+     * @param string $routePattern The route pattern to match.
+     * @param string $name         The unique name of this route.
+     *
+     * @return Route
+     */
+    public function head($routePattern, $name)
+    {
+        return $this->route($routePattern, $name, ['HEAD']);
+    }
+
+    /**
+     * For matching headers.
+     *
+     * @param string $header       The name of the header in the request.
+     * @param string $routePattern The pattern which should be compared against the header.
+     * @param srting $name         The unique name of this route.
+     */
+    public function header($header, $routePattern, $name)
+    {
     }
 
     /**
@@ -124,6 +203,7 @@ class Router
 
         foreach ($this->routes as $route) {
             if ($match = $route->match($request)) {
+
                 if ($match->getStop() === true) {
 
                     // We've found our route.

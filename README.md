@@ -31,3 +31,31 @@ Dependancy
 ----------
 
 PHP >= 5.1.0
+
+
+Process Flow
+------------
+
+Boot Router
+    -> Load Route definition
+    -> Assign each route to the Router table
+        -> Bootup and prepare matchers for individual Route.
+        -> expose interpolation pattern for final generated route
+
+Request occurs [GET - /hello/jeramy]
+    -> push Request into Router->dispatch();
+    -> Loop Routing table
+        -> Get route pull match pattern
+            -> Matches
+                -> if stop route
+                    -> Return route instance to dispatch()
+                -> if non-stop route
+                    -> run route routine
+                    -> continue Loop
+            -> Doesn't Match
+                -> Continue Loop
+        -> No more routes to match?
+            -> Yes
+                -> continue loop.
+            -> No
+                -> Break loop and return null from dispatch()

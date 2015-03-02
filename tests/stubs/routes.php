@@ -4,9 +4,7 @@ use Xylesoft\XyleRouter\TokenMatchers\String;
 use Xylesoft\XyleRouter\TokenMatchers\Number;
 
 $router
-    ->route('^/hello/{category}{/(age)}$')
-        ->methods(['GET'])
-        ->name('index.page')
+    ->get('^/hello/{category}{/(age)}$', 'index.page')
         ->where(
             'category',
             false,

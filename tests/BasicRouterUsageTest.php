@@ -37,11 +37,10 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         $routes = $router->getRoutes();
         $this->assertCount(1, $routes);
         $this->assertEquals('index.page', $routes[0]->getName());
-        $this->assertEquals('#^/hello/(category:[a-zA-Z\-0-9]+){/(age:\d+)}$#', $routes[0]->getRoutePattern());
+        $this->assertEquals('#^\/hello\/(?P<category>[^\/]+)(\/(?P<age>\d+))?$#', $routes[0]->getRoutePattern());
         $this->assertInstanceOf('\Closure', $routes[0]->getHandler());
         $this->assertEquals(['GET'], $routes[0]->getMethods());
-        $this->assertInstanceOf('\Tests\stubs\TokensCallback', $routes[0]->getCallback());
-        $this->assertEquals(['age' => 32], $routes[0]->getDefaults());
+        $this->assertEquals(['age' => '/(32)'], $routes[0]->getDefaults());
     }
 
     /**
@@ -68,14 +67,23 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         $result = $router->dispatch(
             new DummyRequest('/hello/cats')
         );
-        $this->assertNotFalse($result);
-        $this->assertArrayHasKey('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid simple route didn't return RouteInterface");
+        $this->assertFalse($result, 'test failed for {category} string min length of 5 on /hello/cats');
+        $result = $router->dispatch(
+            new DummyRequest('/hello/kittens')
+        );
+        $this->assertNotFalse($result, 'Dispatch result for /hello/kittens is false');
+        $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid simple route didn't return RouteInterface");
 
         // Validate route with optional parameter
         $result = $router->dispatch(
-            new DummyRequest('/goodbye/cats/5')
+            new DummyRequest('/hello/cats/20')
         );
-        $this->assertNotFalse($result);
-        $this->assertArrayHasKey('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid parameter route didn't return RouteInterface");
+        $this->assertFalse($result, 'test failed for {category} string min length of 5 on /hello/cats/20 with age parameter.');
+
+        $result = $router->dispatch(
+            new DummyRequest('/hello/kittens/20')
+        );
+        $this->assertNotFalse($result, 'Dispatch result for /hello/kittens/20 is false');
+        $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid parameter route didn't return RouteInterface");
     }
 }

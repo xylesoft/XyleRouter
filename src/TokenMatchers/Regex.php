@@ -14,19 +14,24 @@ class Regex extends Base
      * Returns true or false if one or more parameters exist in the array of parameters
      * from the URL.
      *
+     * @param string $name The name of the parameter in the request.
+     * @param mixed $parameter Parameter value for matching.
+     * @param RequestInterface $request The current request instance.
+     *
      * @return bool
      */
-    public function match($name, $value, RequestInterface $request)
+    public function match($name, $parameter, RequestInterface $request)
     {
-        // TODO: Implement match() method.
+        // Interpolation pattern matched, so therefore regex succeeded.
+        return true;
     }
 
     /**
-     * The Regular expression pattern to be used to initially match the token.
+     * The pattern to be place in replacement to the token for use with a generated routing table.
      *
      * @return string
      */
-    public function getPattern()
+    public function getInterpolationPattern()
     {
         return $this->options['pattern'];
     }

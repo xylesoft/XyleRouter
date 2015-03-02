@@ -2,7 +2,6 @@
 
 namespace Xylesoft\XyleRouter\Interfaces;
 
-use Xylesoft\XyleRouter\Router;
 
 /**
  * Interface RouteInterface.
@@ -10,17 +9,19 @@ use Xylesoft\XyleRouter\Router;
 interface RouteInterface
 {
     /**
-     * @param string $routePattern
-     * @param Router $router
+     * Construct a new routing rule.
+     *
+     * @param string $routePattern The matching pattern of the route.
+     * @param string $name         The unique name of the this route.
      */
-    public function __construct($routePattern);
+    public function __construct($routePattern, $name);
 
     /**
      * The allowed HTTP methods.
      *
      * @param array $allowedMethods
      *
-     * @return $this
+     * @return RouteInterface
      */
     public function methods(array $allowedMethods);
 
@@ -29,7 +30,7 @@ interface RouteInterface
      *
      * @param \Closure $callable
      *
-     * @return $this
+     * @return RouteInterface
      */
     public function handle(\Closure $callable);
 
@@ -38,7 +39,9 @@ interface RouteInterface
      *
      * @param $name
      *
-     * @return $this
+     * @return RouteInterface
+     *
+     * @deprecated
      */
     public function name($name);
 
@@ -46,6 +49,8 @@ interface RouteInterface
      * Default values for tokens in a URL if the value isn't present.
      *
      * @param array $defaults
+     *
+     * @return RouteInterface
      */
     public function defaults(array $defaults);
 
@@ -54,7 +59,7 @@ interface RouteInterface
      *
      * @param $polarity
      *
-     * @return $this
+     * @return RouteInterface
      */
     public function stop($polarity);
 
@@ -63,14 +68,14 @@ interface RouteInterface
      *
      * @param $polarity
      *
-     * @return $this
+     * @return RouteInterface
      */
     public function cut($polarity);
 
     /**
-     * preg_match REGEX of the route.
+     * Perform a match routine against the request to see if the current route fulfills the outlined conditions.
      *
-     * @param $url
+     * @param RequestInterface $url The request instance.
      *
      * @return RouteInterface|bool
      */
@@ -79,13 +84,13 @@ interface RouteInterface
     /**
      * Method for adding conditions to the tokens in a route pattern.
      *
-     * @param string         $token    The name of the token in the route pattern.
-     * @param bool           $optional Whether the token is optional or not, default: false
-     * @param MatchInterface $matcher  A match class
+     * @param string                $token    The name of the token in the route pattern.
+     * @param bool                  $optional Whether the token is optional or not, default: false
+     * @param TokenMatcherInterface $matcher  A match class
      *
-     * @return bool Whether the match was successful or not.
+     * @return RouteInterface
      */
-    public function where($token, $optional = false, MatchInterface $matcher);
+    public function where($token, $optional = false, TokenMatcherInterface $matcher);
 
     /**
      * @return \Closure
