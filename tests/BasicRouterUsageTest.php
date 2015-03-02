@@ -73,7 +73,8 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         );
         $this->assertNotFalse($result, 'Dispatch result for /hello/kittens is false');
         $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid simple route didn't return RouteInterface");
-
+        $this->assertEquals('index.page', $result->getName());
+        
         // Validate route with optional parameter
         $result = $router->dispatch(
             new DummyRequest('/hello/cats/20')
@@ -85,6 +86,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         );
         $this->assertNotFalse($result, 'Dispatch result for /hello/kittens/20 is false');
         $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid parameter route didn't return RouteInterface");
+        $this->assertEquals('index.page', $result->getName());
 
         // age too high
         $result = $router->dispatch(
@@ -96,6 +98,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         $req = new DummyRequest('/hello/kittens/20');
         $result = $router->dispatch($req);
 
+        $this->assertEquals('index.page', $result->getName());
         $this->assertArrayHasKey('category', $req->getParameters());
         $this->assertArrayHasKey('age', $req->getParameters());
         $this->assertEquals('kittens', $req->getParameter('category'));
@@ -104,7 +107,8 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         // Check if default parameter is populated.
         $req = new DummyRequest('/hello/kittens');
         $result = $router->dispatch($req);
-        
+
+        $this->assertEquals('index.page', $result->getName());
         $this->assertArrayHasKey('category', $req->getParameters());
         $this->assertArrayHasKey('age', $req->getParameters());
         $this->assertEquals('kittens', $req->getParameter('category'));

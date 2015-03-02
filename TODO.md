@@ -5,17 +5,17 @@ Todo for XyleRouter
 -----
 
     [x] Route Requestor.
-    [ ] Regular Expression matching.
+    [x] Regular Expression matching.
     [ ] Route result container.  (MatchedRoute class)
     [ ] Definition specifications.
     [x] Fluent definition interface.
     [ ] Basic Match callback.
-    [ ] Route names.
+    [x] Route names.
     [ ] Contracts.
         [x] RequestInterface (wrapper for getting data from the implemented request)
         [x] MatchInterface (for callbacks.)
         [x] RouteInterface (for creating other route classes which match other data, not just URLS, e.g. sources)
-        [ ] MatchedRouteInterface (for when a route has been matched, the returned container by Router->dispatch())
+        [x] MatchedRouteInterface (for when a route has been matched, the returned container by Router->dispatch())
         [ ] UrlMatcherInterface
     [ ] RouteSource class which acts like the Route class.
     [ ] Url Matcher class
@@ -32,6 +32,7 @@ Todo for XyleRouter
     [ ] Traversable route table (using Traversable interface)
     [ ] Replace ->route() ->group() ->header() with ->onUrl(), ->onUrlGroup() and ->onHeader() -- Think over.
     [ ] Modifiers on Route Generator. For example, ->gen('articles.list*') will attempt to generate the route with current available request parameters.  
+    [ ] Cut from path.
 
 0.3.0
 -----

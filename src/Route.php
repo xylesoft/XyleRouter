@@ -101,7 +101,7 @@ class Route implements RouteInterface
     }
 
     /**
-     * Build the pattern which will match against the incoming path.
+     * Build the REGEX pattern which will match against the incoming path.
      *
      * @param string $pattern
      *
@@ -118,9 +118,7 @@ class Route implements RouteInterface
                 if (array_key_exists('0', $matches) && count($matches[0]) > 0) {
 
                     // Deconstruct regex array into [tokenName => fullTokenSymbol, ...]
-                    $tokensCount = count($matches[0]) * 2;
-                    $tokens = [];
-                    for ($i = 1; $i < $tokensCount; $i++) {
+                    for ($i = 1; $i < (count($matches[0]) * 2); $i++) {
 
                         // The regular expression splits the tokens into {name} = 0 and {/(name)} = 1 match types
                         // in the array.
@@ -136,11 +134,11 @@ class Route implements RouteInterface
                         }
 
                         // Gather the token information together.
-                        // @param TokenMatcherInterface
                         $matcher = $this->tokens[$tokenName];
                         $interpolation = $matcher->getInterpolationPattern();
                         $tokenMatching = sprintf('(?P<%s>%s)', $tokenName, $interpolation);
 
+                        // Replace 'token' or '(token)' with REGEX.
                         $tokenComplexMatching = str_replace(
                             ($isComplex) ? '('.$tokenName.')' : $tokenName,
                             $tokenMatching,
@@ -155,6 +153,7 @@ class Route implements RouteInterface
                             $tokenComplexMatching = sprintf('(%s)?', $tokenComplexMatching);
                         }
 
+                        // Fully replace {token} with (REGEX)
                         $pattern = str_replace($fullToken, $tokenComplexMatching, $pattern);
                     }
 
@@ -260,6 +259,25 @@ class Route implements RouteInterface
     }
 
     /**
+     * Method for adding conditions to the tokens in a route pattern.
+     *
+     * @param string                $token    The name of the token in the route pattern.
+     * @param bool                  $optional Whether the token is optional or not, default: false
+     * @param TokenMatcherInterface $matcher  A match class
+     *
+     * @return RouteInterface
+     */
+    public function where($token, $optional = false, TokenMatcherInterface $matcher)
+    {
+        $this->tokens[$token] = $matcher;
+        if ($optional) {
+            $this->optionalTokens[] = $token;
+        }
+
+        return $this;
+    }
+
+    /**
      * Perform a match routine against the request to see if the current route fulfills the outlined conditions.
      *
      * @param RequestInterface $url The request instance.
@@ -316,25 +334,6 @@ class Route implements RouteInterface
 
         // Matching failed.
         return false;
-    }
-
-    /**
-     * Method for adding conditions to the tokens in a route pattern.
-     *
-     * @param string                $token    The name of the token in the route pattern.
-     * @param bool                  $optional Whether the token is optional or not, default: false
-     * @param TokenMatcherInterface $matcher  A match class
-     *
-     * @return RouteInterface
-     */
-    public function where($token, $optional = false, TokenMatcherInterface $matcher)
-    {
-        $this->tokens[$token] = $matcher;
-        if ($optional) {
-            $this->optionalTokens[] = $token;
-        }
-
-        return $this;
     }
 
     /************************************
