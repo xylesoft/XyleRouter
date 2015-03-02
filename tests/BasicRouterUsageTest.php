@@ -85,5 +85,12 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         );
         $this->assertNotFalse($result, 'Dispatch result for /hello/kittens/20 is false');
         $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid parameter route didn't return RouteInterface");
+
+        // age too high
+        $result = $router->dispatch(
+            new DummyRequest('/hello/cats/2000')
+        );
+        $this->assertFalse($result, 'test failed on /hello/cats/2000 with too high age parameter.');
+
     }
 }
