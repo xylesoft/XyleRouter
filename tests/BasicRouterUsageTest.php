@@ -35,12 +35,19 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         $router->initialize(__DIR__.'/stubs/routes.php');
 
         $routes = $router->getRoutes();
-        $this->assertCount(1, $routes);
+        $this->assertCount(2, $routes);
+
         $this->assertEquals('index.page', $routes[0]->getName());
         $this->assertEquals('#^\/hello\/(?P<category>[^\/]+)(\/(?P<age>\d+))?$#', $routes[0]->getRoutePattern());
         $this->assertInstanceOf('\Closure', $routes[0]->getHandler());
         $this->assertEquals(['GET'], $routes[0]->getMethods());
         $this->assertEquals(['age' => '/(32)'], $routes[0]->getDefaults());
+
+        $this->assertEquals('user.statistics.view', $routes[1]->getName());
+        $this->assertEquals('#^\/users\/(?P<name>[^\/]+)\/(?P<statistic>[^\/]+)(\/(?P<sort>[^\/]+))?$#', $routes[1]->getRoutePattern());
+        $this->assertInstanceOf('\Closure', $routes[1]->getHandler());
+        $this->assertEquals(['GET'], $routes[1]->getMethods());
+        $this->assertEquals(['age' => '/(id)'], $routes[1]->getDefaults());
     }
 
     /**
@@ -113,6 +120,19 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('age', $req->getParameters());
         $this->assertEquals('kittens', $req->getParameter('category'));
         $this->assertEquals('32', $req->getParameter('age'));
+
+        // Testing user.statistics.view route.
+        $req = new DummyRequest('/user/jeramy/statistics/around');
+        $result = $router->dispatch($req);
+
+        $this->assertEquals('user.statistics.view', $result->getName());
+        $this->assertArrayHasKey('name', $req->getParameters());
+        $this->assertArrayHasKey('statistic', $req->getParameters());
+        $this->assertArrayHasKey('sort', $req->getParameters());
+        $this->assertEquals('jeramy', $req->getParameter('name'));
+        $this->assertEquals('around', $req->getParameter('statistic'));
+        $this->assertEquals('id', $req->getParameter('sort'));
+
 
     }
 }

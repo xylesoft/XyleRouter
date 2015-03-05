@@ -29,3 +29,14 @@ $router
             return "Route Matched.";
         })
     ;
+
+$router
+    ->get('/users/{name}/statistics/{statistic}{/(sort)}', 'user.statistics.view')
+        ->where('name', false, new String())
+        ->where('statistic', false, new String())
+        ->where('sort', true, new String())
+        ->defaults(['sort'=>'/(id)'])
+        ->handle(function($parameters, $request) {
+
+            return "Matched user.statistics.view";
+        });

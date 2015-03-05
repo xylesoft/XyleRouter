@@ -130,7 +130,7 @@ class Route implements RouteInterface
 
                         // Make sure the corresponding where() definition exists for the token.
                         if (! array_key_exists($tokenName, $this->tokens)) {
-                            throw new \InvalidArgumentException('URL token is not defined in your where tokens: '.$tokenName);
+                            throw new \InvalidArgumentException('URL token is not defined in your where tokens: ' . $tokenName);
                         }
 
                         // Gather the token information together.
