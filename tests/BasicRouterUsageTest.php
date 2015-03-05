@@ -74,7 +74,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         $this->assertNotFalse($result, 'Dispatch result for /hello/kittens is false');
         $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid simple route didn't return RouteInterface");
         $this->assertEquals('index.page', $result->getName());
-        
+
         // Validate route with optional parameter
         $result = $router->dispatch(
             new DummyRequest('/hello/cats/20')

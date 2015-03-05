@@ -5,6 +5,7 @@ namespace Xylesoft\XyleRouter;
 use Xylesoft\XyleRouter\Interfaces\TokenMatcherInterface;
 use Xylesoft\XyleRouter\Interfaces\RequestInterface;
 use Xylesoft\XyleRouter\Interfaces\RouteInterface;
+use Xylesoft\XyleRouter\PatternParser\StandardRegex;
 
 /**
  * Class Route.
@@ -89,15 +90,25 @@ class Route implements RouteInterface
     protected $optionalTokens = [];
 
     /**
+     * The pattern builder.
+     *
+     * @var PatternParser\StandardRegex
+     */
+    protected $parser;
+
+    /**
      * Construct a new routing rule.
      *
-     * @param string $routePattern The matching pattern of the route.
-     * @param string $name         The unique name of the this route.
+     * @param string        $routePattern The matching pattern of the route.
+     * @param string        $name         The unique name of the this route.
+     * @param StandardRegex $parser
      */
-    public function __construct($routePattern, $name)
+    public function __construct($routePattern, $name, StandardRegex $parser = null)
     {
         $this->routePattern = $routePattern;
         $this->name($name);
+
+        $this->parser = ($parser) ?: new StandardRegex();
     }
 
     /**
@@ -110,67 +121,7 @@ class Route implements RouteInterface
     private function parse($pattern)
     {
         if (! $this->regexPattern) {
-
-            // Get all {xxx} tokens.
-            if (preg_match_all('#({([a-zA-Z0-9]+)})|({\/\(([a-zA-Z0-9]+)\)})#', $pattern, $matches)) {
-                // a more complex pattern, requiring individual parameter matching
-
-                if (array_key_exists('0', $matches) && count($matches[0]) > 0) {
-
-                    // Deconstruct regex array into [tokenName => fullTokenSymbol, ...]
-                    for ($i = 1; $i < (count($matches[0]) * 2); $i++) {
-
-                        // The regular expression splits the tokens into {name} = 0 and {/(name)} = 1 match types
-                        // in the array.
-                        $isComplex = (mb_strlen(trim($matches[$i][1]))>0);
-
-                        $fullToken = (! $isComplex) ? $matches[$i][0] : $matches[$i][1];
-                        $i++;
-                        $tokenName = (! $isComplex) ? $matches[$i][0] : $matches[$i][1];
-
-                        // Make sure the corresponding where() definition exists for the token.
-                        if (! array_key_exists($tokenName, $this->tokens)) {
-                            throw new \InvalidArgumentException('URL token is not defined in your where tokens: '.$tokenName);
-                        }
-
-                        // Gather the token information together.
-                        $matcher = $this->tokens[$tokenName];
-                        $interpolation = $matcher->getInterpolationPattern();
-                        $tokenMatching = sprintf('(?P<%s>%s)', $tokenName, $interpolation);
-
-                        // Replace 'token' or '(token)' with REGEX.
-                        $tokenComplexMatching = str_replace(
-                            ($isComplex) ? '('.$tokenName.')' : $tokenName,
-                            $tokenMatching,
-                            $fullToken
-                        );
-
-                        // remove { and }
-                        $tokenComplexMatching = mb_substr($tokenComplexMatching, 1, mb_strlen($tokenComplexMatching) - 2);
-
-                        // Is the token optional?
-                        if (in_array($tokenName, $this->optionalTokens)) {
-                            $tokenComplexMatching = sprintf('(%s)?', $tokenComplexMatching);
-                        }
-
-                        // Fully replace {token} with (REGEX)
-                        $pattern = str_replace($fullToken, $tokenComplexMatching, $pattern);
-                    }
-
-                    // switch remaining / to \/ so its compatible with regex.
-                    $pattern = preg_replace('#([^\\\\])/#', '$1\/', $pattern);
-                }
-            }
-
-            // add start and end regex symbols
-            if (mb_substr($pattern, -1) !== '$') {
-                $pattern .= '$';
-            }
-            if (mb_substr($pattern, 0, 1) !== '^') {
-                $pattern = '^'.$pattern;
-            }
-
-            $this->regexPattern = '#'.$pattern.'#';
+            $this->regexPattern = $this->parser->parse($pattern, $this->tokens, $this->optionalTokens);
         }
 
         return $this->regexPattern;
@@ -286,16 +237,13 @@ class Route implements RouteInterface
      */
     public function match(RequestInterface $request)
     {
-
         if (preg_match_all($this->parse($this->routePattern), $request->getUrl(), $parameters)) {
 
             // initial matching succeeded, now time to check parameters
             if (count($this->tokens)) {
-
                 foreach ($this->tokens as $tokenName => $tokenMatcher) {
                     $parameter = "";
                     if (array_key_exists($tokenName, $parameters) && mb_strlen($parameters[$tokenName][0]) > 0) {
-
                         $parameter = $parameters[$tokenName][0];
                         if (! $tokenMatcher->match($tokenName, $parameter, $request) && ! in_array($tokenName, $this->optionalTokens)) {
 
@@ -312,16 +260,13 @@ class Route implements RouteInterface
                         }
                     }
 
-
                     // All tests passed. Now time to check whether a default should be put in place?
                     if (mb_strlen($parameters[$tokenName][0]) == 0 && array_key_exists($tokenName, $this->defaults)) {
-
                         $default = $this->defaults[$tokenName];
                         if (preg_match('#\((.+)\)#', $default, $match)) {
                             $parameter = $match[1];
                         }
                     }
-
 
                     // we can assume parameter is valid and should now be set against
                     // the request.

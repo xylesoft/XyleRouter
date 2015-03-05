@@ -4,6 +4,7 @@ namespace Xylesoft\XyleRouter;
 
 use Xylesoft\XyleRouter\Interfaces\RequestInterface;
 use Xylesoft\XyleRouter\Interfaces\RouteInterface;
+use Xylesoft\XyleRouter\PatternParser\StandardRegex;
 
 /**
  * Class Router.
@@ -42,6 +43,9 @@ class Router
                 )
             );
         }
+
+        // define the Pattern Building Parser
+        $this->buildingParser = new StandardRegex();
 
         if ($definitionFile) {
             $this->initialize($definitionFile);
@@ -100,7 +104,7 @@ class Router
     public function route($routePattern, $name, array $allowedMethods)
     {
         $routeClass = $this->routeClassNamespace;
-        $route = new $routeClass($routePattern, $name);
+        $route = new $routeClass($routePattern, $name, $this->buildingParser);
         $route->methods($allowedMethods);
 
         if (! $route instanceof RouteInterface) {
