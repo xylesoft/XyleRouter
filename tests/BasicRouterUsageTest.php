@@ -132,5 +132,20 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('pancho', $req->getParameter('name'));
         $this->assertEquals('breed', $req->getParameter('statistic'));
         $this->assertEquals('id', $req->getParameter('sort'));
+
+        // Check if full more complex pattern works
+        $req = new DummyRequest('/users/pancho/statistics/breed/id/special-offer-for-pancho-only-today');
+        $result = $router->dispatch($req);
+
+        $this->assertEquals('users.statistic.view', $result->getName());
+        $this->assertArrayHasKey('name', $req->getParameters());
+        $this->assertArrayHasKey('statistic', $req->getParameters());
+        $this->assertArrayHasKey('sort', $req->getParameters());
+        $this->assertArrayHasKey('clientsForeName', $req->getParameters());
+
+        $this->assertEquals('pancho', $req->getParameter('name'));
+        $this->assertEquals('breed', $req->getParameter('statistic'));
+        $this->assertEquals('id', $req->getParameter('sort'));
+        $this->assertEquals('pancho', $req->getParameter('clientsForeName'));
     }
 }
