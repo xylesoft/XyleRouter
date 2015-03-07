@@ -35,12 +35,18 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         $router->initialize(__DIR__.'/stubs/routes.php');
 
         $routes = $router->getRoutes();
-        $this->assertCount(1, $routes);
+        $this->assertCount(2, $routes);
         $this->assertEquals('index.page', $routes[0]->getName());
         $this->assertEquals('#^\/hello\/(?P<category>[^\/]+)(\/(?P<age>\d+))?$#', $routes[0]->getRoutePattern());
         $this->assertInstanceOf('\Closure', $routes[0]->getHandler());
         $this->assertEquals(['GET'], $routes[0]->getMethods());
         $this->assertEquals(['age' => '/(32)'], $routes[0]->getDefaults());
+
+        $this->assertEquals('users.statistic.view', $routes[1]->getName());
+//        $this->assertEquals('#^\/hello\/(?P<category>[^\/]+)(\/(?P<age>\d+))?$#', $routes[1]->getRoutePattern());
+        $this->assertInstanceOf('\Closure', $routes[1]->getHandler());
+        $this->assertEquals(['GET'], $routes[1]->getMethods());
+        $this->assertEquals(['sort' => '/(id)'], $routes[1]->getDefaults());
     }
 
     /**
@@ -114,5 +120,17 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('kittens', $req->getParameter('category'));
         $this->assertEquals('32', $req->getParameter('age'));
 
+        // Check if more complex pattern works
+        $req = new DummyRequest('/users/pancho/statistics/breed/id');
+        $result = $router->dispatch($req);
+
+        $this->assertEquals('users.statistic.view', $result->getName());
+        $this->assertArrayHasKey('name', $req->getParameters());
+        $this->assertArrayHasKey('statistic', $req->getParameters());
+        $this->assertArrayHasKey('sort', $req->getParameters());
+
+        $this->assertEquals('pancho', $req->getParameter('name'));
+        $this->assertEquals('breed', $req->getParameter('statistic'));
+        $this->assertEquals('id', $req->getParameter('sort'));
     }
 }

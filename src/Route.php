@@ -2,78 +2,25 @@
 
 namespace Xylesoft\XyleRouter;
 
+use Xylesoft\XyleRouter\Abstracts\RouteAbstract;
 use Xylesoft\XyleRouter\Interfaces\TokenMatcherInterface;
 use Xylesoft\XyleRouter\Interfaces\RequestInterface;
 use Xylesoft\XyleRouter\Interfaces\RouteInterface;
-use Xylesoft\XyleRouter\PatternParser\StandardRegex;
+use Xylesoft\XyleRouter\PatternParsers\LatinRegex;
 
 /**
  * Class Route.
  *
  * A single route definition class.
  */
-class Route implements RouteInterface
+class Route extends RouteAbstract
 {
-    /**
-     * The current route pattern.
-     *
-     * @var string
-     */
-    private $routePattern;
-
     /**
      * The current route as a full regular expression.
      *
      * @var string
      */
-    private $regexPattern = null;
-
-    /**
-     * The allowed HTTP methods for the current route.
-     *
-     * @var array
-     */
-    protected $methods;
-
-    /**
-     * The handler of a successfully matched and stopped route.
-     *
-     * @var \Closure
-     */
-    protected $handler;
-
-    /**
-     * @var \Xylesoft\XyleRouter\Interfaces\TokenMatcherInterface
-     */
-    protected $callback;
-
-    /**
-     * Unique name of the route.
-     *
-     * @var string
-     */
-    protected $name;
-
-    /**
-     * The default value to be interpolated into a token if the token isn't provided a value.
-     *
-     * @var array
-     */
-    protected $defaults;
-
-    /**
-     * Whether to stop on this route if match was successful or not.
-     *
-     * @var bool
-     */
-    protected $stop = true;
-
-    /**
-     * Strip out the current route pattern before allowing the routing request to move to the next route check.
-     *
-     * @var bool
-     */
-    protected $cut = false;
+    protected $regexPattern = null;
 
     /**
      * Array of tokens and the rules which apply to the token.
@@ -89,27 +36,6 @@ class Route implements RouteInterface
      */
     protected $optionalTokens = [];
 
-    /**
-     * The pattern builder.
-     *
-     * @var PatternParser\StandardRegex
-     */
-    protected $parser;
-
-    /**
-     * Construct a new routing rule.
-     *
-     * @param string        $routePattern The matching pattern of the route.
-     * @param string        $name         The unique name of the this route.
-     * @param StandardRegex $parser
-     */
-    public function __construct($routePattern, $name, StandardRegex $parser = null)
-    {
-        $this->routePattern = $routePattern;
-        $this->name($name);
-
-        $this->parser = ($parser) ?: new StandardRegex();
-    }
 
     /**
      * Build the REGEX pattern which will match against the incoming path.

@@ -9,14 +9,6 @@ namespace Xylesoft\XyleRouter\Interfaces;
 interface RouteInterface
 {
     /**
-     * Construct a new routing rule.
-     *
-     * @param string $routePattern The matching pattern of the route.
-     * @param string $name         The unique name of the this route.
-     */
-    public function __construct($routePattern, $name);
-
-    /**
      * The allowed HTTP methods.
      *
      * @param array $allowedMethods

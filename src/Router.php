@@ -4,7 +4,7 @@ namespace Xylesoft\XyleRouter;
 
 use Xylesoft\XyleRouter\Interfaces\RequestInterface;
 use Xylesoft\XyleRouter\Interfaces\RouteInterface;
-use Xylesoft\XyleRouter\PatternParser\StandardRegex;
+use Xylesoft\XyleRouter\PatternParsers\LatinRegex;
 
 /**
  * Class Router.
@@ -24,13 +24,22 @@ class Router
     protected $routes;
 
     /**
+     * @var PatternParsers\LatinRegex
+     */
+    protected $patternParser;
+
+    /**
      * @param string $routeClassNamespace The fully qualified namespace of a route class which
      *                                    implements \Xylesoft\XyleRouter\Interfaces\RouteInterface.
      * @param string $definitionFile      Optionally initialize the definition during construct.
      */
     public function __construct($routeClassNamespace, $definitionFile = null)
     {
+        // define the Route node class
         $this->routeClassNamespace = $routeClassNamespace;
+
+        // define the Pattern Building Parser
+        $this->patternParser = new LatinRegex();
 
         // Make sure the provided route class implements the required interface.
         $implementations = class_implements($this->routeClassNamespace);
@@ -44,9 +53,7 @@ class Router
             );
         }
 
-        // define the Pattern Building Parser
-        $this->buildingParser = new StandardRegex();
-
+        // Initialize a definition file if provided.
         if ($definitionFile) {
             $this->initialize($definitionFile);
         }
@@ -104,7 +111,7 @@ class Router
     public function route($routePattern, $name, array $allowedMethods)
     {
         $routeClass = $this->routeClassNamespace;
-        $route = new $routeClass($routePattern, $name, $this->buildingParser);
+        $route = new $routeClass($routePattern, $name, $this->patternParser);
         $route->methods($allowedMethods);
 
         if (! $route instanceof RouteInterface) {
