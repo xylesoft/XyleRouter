@@ -43,7 +43,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(['age' => '/(32)'], $routes[0]->getDefaults());
 
         $this->assertEquals('users.statistic.view', $routes[1]->getName());
-//        $this->assertEquals('#^\/hello\/(?P<category>[^\/]+)(\/(?P<age>\d+))?$#', $routes[1]->getRoutePattern());
+        $this->assertEquals('#^\/users\/(?P<name>[^\/]+)\/statistics\/(?P<statistic>[^\/]+)(\/(?P<sort>[^\/]+))?(\/special-offer-for-(?P<clientsForeName>[^\/]+)-only-today)?$#', $routes[1]->getRoutePattern());
         $this->assertInstanceOf('\Closure', $routes[1]->getHandler());
         $this->assertEquals(['GET'], $routes[1]->getMethods());
         $this->assertEquals(['sort' => '/(id)'], $routes[1]->getDefaults());
@@ -134,7 +134,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('id', $req->getParameter('sort'));
 
         // Check if full more complex pattern works
-        $req = new DummyRequest('/users/pancho/statistics/breed/id/special-offer-for-pancho-only-today');
+        $req = new DummyRequest('/users/pancho/statistics/breed/claw-size/special-offer-for-pancho-only-today');
         $result = $router->dispatch($req);
 
         $this->assertEquals('users.statistic.view', $result->getName());
@@ -145,7 +145,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals('pancho', $req->getParameter('name'));
         $this->assertEquals('breed', $req->getParameter('statistic'));
-        $this->assertEquals('id', $req->getParameter('sort'));
+        $this->assertEquals('claw-size', $req->getParameter('sort'));
         $this->assertEquals('pancho', $req->getParameter('clientsForeName'));
     }
 }

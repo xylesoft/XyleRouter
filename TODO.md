@@ -16,11 +16,11 @@ Todo for XyleRouter
         [x] MatchInterface (for callbacks.)
         [x] RouteInterface (for creating other route classes which match other data, not just URLS, e.g. sources)
         [x] MatchedRouteInterface (for when a route has been matched, the returned container by Router->dispatch())
-        [ ] UrlMatcherInterface
+        [x] PatternParserInterface
     [ ] RouteSource class which acts like the Route class.
-    [ ] Url Matcher class
+    [x] Url Matcher class (Pattern Parser)
     [ ] Finite State machine for parsing route patterns (PatternParser)
-    [ ] Scrutinize the $router being passed to the Route class. Possibly remove.
+    [x] Scrutinize the $router being passed to the Route class. Possibly remove. REMOVED.
 
 0.2.0
 -----
