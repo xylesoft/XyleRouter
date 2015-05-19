@@ -29,34 +29,41 @@ class Router
     protected $patternParser;
 
     /**
+     * @var array Router configurations:
+     * @property string route_class_namespace           The Route class, used in method: route()
+     * @property string route_group_class_namespace     The Route Grouping class, used in method: group()
+     * @property string pattern_parser_class_namespace  The Route Grouping class, used in method: group()
+     */
+    protected $configuration = [
+
+    ];
+
+    /**
      * @param string $routeClassNamespace The fully qualified namespace of a route class which
      *                                    implements \Xylesoft\XyleRouter\Interfaces\RouteInterface.
      * @param string $definitionFile      Optionally initialize the definition during construct.
      */
     public function __construct($routeClassNamespace, $definitionFile = null)
     {
-        // define the Route node class
-        $this->routeClassNamespace = $routeClassNamespace;
+        // define the Route class name
+        $this->register('route_class_namespace', '\Xylesoft\XyleRouter\Route');
+        $this->register('route_group_class_namespace', '\Xylesoft\XyleRouter\RouteGroup');
+        $this->register('header_class_namespace', '\Xylesoft\XyleRouter\Header');
+//        $this->routeClassNamespace = $routeClassNamespace;
 
         // define the Pattern Building Parser
-        $this->patternParser = new LatinRegex();
-
-        // Make sure the provided route class implements the required interface.
-        $implementations = class_implements($this->routeClassNamespace);
-
-        if (! in_array('Xylesoft\XyleRouter\Interfaces\RouteInterface', $implementations)) {
-            throw new \RuntimeException(
-                sprintf(
-                    'Route class [%s] does not implement Xylesoft\XyleRouter\Interfaces\RouteInterface',
-                    $this->routeClassNamespace
-                )
-            );
-        }
+        $this->register('pattern_parser_class_namespace', new LatinRegex());
+//        $this->patternParser = new LatinRegex();
 
         // Initialize a definition file if provided.
         if ($definitionFile) {
             $this->initialize($definitionFile);
         }
+    }
+
+    public function register($config, $value)
+    {
+        $this->configuration[$config] = $value;
     }
 
     /**
@@ -110,13 +117,14 @@ class Router
      */
     public function route($routePattern, $name, array $allowedMethods)
     {
-        $routeClass = $this->routeClassNamespace;
-        $route = new $routeClass($routePattern, $name, $this->patternParser);
-        $route->methods($allowedMethods);
+        $routeClass = $this->configuration['route_class_namespace'];
+        $route = new $routeClass($routePattern, $name, $this->configuration['pattern_parser_class_namespace']);
 
         if (! $route instanceof RouteInterface) {
             throw new \RuntimeException('Route class does not implement \Xylesoft\XyleRouter\Interfaces\RouteInterface');
         }
+
+        $route->methods($allowedMethods);
 
         $this->routes[] = $route;
 
@@ -192,11 +200,25 @@ class Router
      * For matching headers.
      *
      * @param string $header       The name of the header in the request.
-     * @param string $routePattern The pattern which should be compared against the header.
+     * @param string $routePattern The pattern which should be compared against the header's value.
      * @param srting $name         The unique name of this route.
      */
     public function header($header, $routePattern, $name)
     {
+    }
+
+    public function group($routePattern, $name, callable $childRoutes)
+    {
+        $routeClass = $this->configuration['route_group_class_namespace'];
+        $routeGroup = new $routeClass($routePattern, $name, $this->configuration['pattern_parser_class_namespace']);
+
+        if (! $routeGroup instanceof RouteGroupInterface) {
+            throw new \RuntimeException('Route class does not implement \Xylesoft\XyleRouter\Interfaces\RouteGroupInterface');
+        }
+
+        $this->routes[] = $routeGroup;
+
+        return $routeGroup;
     }
 
     /**
@@ -214,7 +236,6 @@ class Router
 
         foreach ($this->routes as $route) {
             if ($match = $route->match($request)) {
-
                 if ($match->getStop() === true) {
 
                     // We've found our route.

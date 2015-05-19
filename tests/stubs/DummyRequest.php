@@ -12,7 +12,7 @@ class DummyRequest implements RequestInterface
     ];
 
     private $headers = [
-        'accept' => 'application/json',
+        'accepts' => 'application/json',
     ];
 
     private $url;

@@ -108,7 +108,7 @@ class Route extends RouteAbstract
     }
 
     /**
-     * Whether the route stops here or carries on matching.
+     * Whether the matched route stops here or carries on down the routing table.
      *
      * @param $polarity
      *
