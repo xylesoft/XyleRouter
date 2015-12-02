@@ -2,253 +2,135 @@
 
 namespace Xylesoft\XyleRouter;
 
+use Xylesoft\XyleRouter\Configuration\Configurations;
 use Xylesoft\XyleRouter\Interfaces\RequestInterface;
+use Xylesoft\XyleRouter\Interfaces\Route\RouteStoppingInterface;
 use Xylesoft\XyleRouter\Interfaces\RouteInterface;
-use Xylesoft\XyleRouter\PatternParsers\LatinRegex;
+use Xylesoft\XyleRouter\Traits\HttpMethodsFacade;
+use Xylesoft\XyleRouter\Traits\RouteClasses;
 
 /**
  * Class Router.
  */
-class Router
-{
-    /**
-     * @var string
-     */
-    protected $routeClassNamespace;
+class Router {
 
-    /**
-     * The array of all the routes.
-     *
-     * @var array of \Xylesoft\XyleRouter\Route
-     */
-    protected $routes;
+	use HttpMethodsFacade;
+	use RouteClasses;
 
-    /**
-     * @var PatternParsers\LatinRegex
-     */
-    protected $patternParser;
+	/**
+	 * The array of all the routes.
+	 *
+	 * @var array of \Xylesoft\XyleRouter\Route
+	 */
+	protected $routes;
 
-    /**
-     * @var array Router configurations:
-     * @property string route_class_namespace           The Route class, used in method: route()
-     * @property string route_group_class_namespace     The Route Grouping class, used in method: group()
-     * @property string pattern_parser_class_namespace  The Route Grouping class, used in method: group()
-     */
-    protected $configuration = [
+	/**
+	 * @var PatternParsers\LatinRegex
+	 */
+	protected $patternParser;
 
-    ];
+	/**
+	 * @var Configurations
+	 */
+	protected $configurations;
 
-    /**
-     * @param string $routeClassNamespace The fully qualified namespace of a route class which
-     *                                    implements \Xylesoft\XyleRouter\Interfaces\RouteInterface.
-     * @param string $definitionFile      Optionally initialize the definition during construct.
-     */
-    public function __construct($routeClassNamespace, $definitionFile = null)
-    {
-        // define the Route class name
-        $this->register('route_class_namespace', '\Xylesoft\XyleRouter\Route');
-        $this->register('route_group_class_namespace', '\Xylesoft\XyleRouter\RouteGroup');
-        $this->register('header_class_namespace', '\Xylesoft\XyleRouter\Header');
-//        $this->routeClassNamespace = $routeClassNamespace;
+	/**
+	 * @param Configurations $configurations
+	 * @param string $definitionFile Optionally initialize the definition during construct.
+	 */
+	public function __construct(Configurations $configurations, $definitionFile = null) {
 
-        // define the Pattern Building Parser
-        $this->register('pattern_parser_class_namespace', new LatinRegex());
-//        $this->patternParser = new LatinRegex();
+		$this->configurations = $configurations;
 
-        // Initialize a definition file if provided.
-        if ($definitionFile) {
-            $this->initialize($definitionFile);
-        }
-    }
+		// Makes sure all the configured classes implement the correct interfaces.
+		$this->validateRouteClasses();
 
-    public function register($config, $value)
-    {
-        $this->configuration[$config] = $value;
-    }
+		// Initialize a definition file if provided.
+		if ($definitionFile) {
+			$this->initialize($definitionFile);
+		}
+	}
 
-    /**
-     * Load the router definition into memory.
-     *
-     * @param string $definitionFile
-     */
-    public function initialize($definitionFile)
-    {
-        if (! file_exists($definitionFile)) {
+	protected function validateRouteClasses() {
 
-            // No definition path found
-            throw new \InvalidArgumentException('Route definition not found: '.$definitionFile);
-        }
+		if (!$this->getRouteClass('nothing', 'testing') instanceof RouteInterface) {
+			throw new \RuntimeException('config: route_class_namespace class does not implement \Xylesoft\XyleRouter\Interfaces\RouteInterface');
+		}
 
-        if (! is_readable($definitionFile)) {
+		if (!$this->getRouteGroupClass($this->configurations, 'nothing', 'testing', function($router) {}, null) instanceof RouteInterface) {
+			throw new \RuntimeException('config: route_group_class_namespace class does not implement \Xylesoft\XyleRouter\Interfaces\RouteInterface');
+		}
 
-            // No definition path found
-            throw new \InvalidArgumentException('Route definition file is unreadable: '.$definitionFile);
-        }
+		//		if (!$this->getRouteHeaderClass('nothing', 'testing') instanceof RouteInterface) {
+		//			throw new \RuntimeException('config: route_group_class_namespace class does not implement \Xylesoft\XyleRouter\Interfaces\RouteGroupInterface');
+		//		}
+	}
 
-        $router = $this;
-        include $definitionFile;
-    }
+	/**
+	 * Load the router definition into memory.
+	 *
+	 * @param string $definitionFile
+	 */
+	public function initialize($definitionFile) {
 
-    /**
-     * Get defined routes table.
-     *
-     * @return array
-     */
-    public function getRoutes()
-    {
-        return $this->routes;
-    }
+		if (!file_exists($definitionFile)) {
 
-//    /**
-//     * Set the routes table from a cache
-//     */
-//    public function setRoutes() {
-//
-//    }
+			// No definition path found
+			throw new \InvalidArgumentException('Route definition not found: ' . $definitionFile);
+		}
 
-    /**
-     * Define a new route.
-     *
-     * @param string $routePattern   The route pattern.
-     * @param string $name           The unique name of this route.
-     * @param array  $allowedMethods The allowed HTTP methods.
-     *
-     * @return Route
-     */
-    public function route($routePattern, $name, array $allowedMethods)
-    {
-        $routeClass = $this->configuration['route_class_namespace'];
-        $route = new $routeClass($routePattern, $name, $this->configuration['pattern_parser_class_namespace']);
+		if (!is_readable($definitionFile)) {
 
-        if (! $route instanceof RouteInterface) {
-            throw new \RuntimeException('Route class does not implement \Xylesoft\XyleRouter\Interfaces\RouteInterface');
-        }
+			// No definition path found
+			throw new \InvalidArgumentException('Route definition file is unreadable: ' . $definitionFile);
+		}
 
-        $route->methods($allowedMethods);
+		$router = $this;
+		include $definitionFile;
+	}
 
-        $this->routes[] = $route;
+	/**
+	 * Attempt to match a route.
+	 *
+	 * @param RequestInterface $request
+	 *
+	 * @return \Xylesoft\XyleRouter\Interfaces\RouteInterface|false
+	 */
+	public function dispatch(RequestInterface $request) {
 
-        return $route;
-    }
+		$nonStoppedMatches = [];
 
-    /**
-     * HTTP GET Route.
-     *
-     * @param string $routePattern The route pattern to match.
-     * @param string $name         The unique name of this route.
-     *
-     * @return Route
-     */
-    public function get($routePattern, $name)
-    {
-        return $this->route($routePattern, $name, ['GET']);
-    }
+		// @TODO Use immutable request object for running the route matching chain, so the path can be manipulated.
 
-    /**
-     * HTTP POST Route.
-     *
-     * @param string $routePattern The route pattern to match.
-     * @param string $name         The unique name of this route.
-     *
-     * @return Route
-     */
-    public function post($routePattern, $name)
-    {
-        return $this->route($routePattern, $name, ['POST']);
-    }
+		foreach ($this->routes as $route) {
+			if ($match = $route->match($request)) {
+				if ($match instanceof RouteStoppingInterface && $match->getStop() === true) {
 
-    /**
-     * HTTP PUT Route.
-     *
-     * @param string $routePattern The route pattern to match.
-     * @param string $name         The unique name of this route.
-     *
-     * @return Route
-     */
-    public function put($routePattern, $name)
-    {
-        return $this->route($routePattern, $name, ['PUT']);
-    }
+					// We've found our route.
+					return $match;
+				} else {
 
-    /**
-     * HTTP DELETE Route.
-     *
-     * @param string $routePattern The route pattern to match.
-     * @param string $name         The unique name of this route.
-     *
-     * @return Route
-     */
-    public function delete($routePattern, $name)
-    {
-        return $this->route($routePattern, $name, ['DELETE']);
-    }
+					// Carry on, but preserve the information acquired from the non-stop route.
+					$nonStoppedMatches[] = $match;
+				}
+			}
+		}
 
-    /**
-     * HTTP HEAD Route.
-     *
-     * @param string $routePattern The route pattern to match.
-     * @param string $name         The unique name of this route.
-     *
-     * @return Route
-     */
-    public function head($routePattern, $name)
-    {
-        return $this->route($routePattern, $name, ['HEAD']);
-    }
+		// No match
+		return false;
+	}
 
-    /**
-     * For matching headers.
-     *
-     * @param string $header       The name of the header in the request.
-     * @param string $routePattern The pattern which should be compared against the header's value.
-     * @param srting $name         The unique name of this route.
-     */
-    public function header($header, $routePattern, $name)
-    {
-    }
+	/**
+	 * Generate a URL based on a route name.
+	 *
+	 * @param string $name
+	 * @param array $parameters
+	 * @param bool|true $relativePath
+	 * @return string
+	 *
+	 * @throws InvalidRouteNameException
+	 */
+	public function generateUrl($name, $parameters, $relativePath = true) {
 
-    public function group($routePattern, $name, callable $childRoutes)
-    {
-        $routeClass = $this->configuration['route_group_class_namespace'];
-        $routeGroup = new $routeClass($routePattern, $name, $this->configuration['pattern_parser_class_namespace']);
-
-        if (! $routeGroup instanceof RouteGroupInterface) {
-            throw new \RuntimeException('Route class does not implement \Xylesoft\XyleRouter\Interfaces\RouteGroupInterface');
-        }
-
-        $this->routes[] = $routeGroup;
-
-        return $routeGroup;
-    }
-
-    /**
-     * Attempt to match a route.
-     *
-     * @param RequestInterface $request
-     *
-     * @return \Xylesoft\XyleRouter\Interfaces\RouteInterface|false
-     */
-    public function dispatch(RequestInterface $request)
-    {
-        $nonStoppedMatches = [];
-
-        // @TODO Use immutable request type object for running the route matching chain, so the path can be manipulated.
-
-        foreach ($this->routes as $route) {
-            if ($match = $route->match($request)) {
-                if ($match->getStop() === true) {
-
-                    // We've found our route.
-                    return $match;
-                } else {
-
-                    // Carry on, but preserve the information aquired from the non-stop route.
-                    $nonStoppedMatches[] = $match;
-                }
-            }
-        }
-
-        // No match
-        return false;
-    }
+	}
 }
