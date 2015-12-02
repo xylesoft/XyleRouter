@@ -7,115 +7,113 @@ use Xylesoft\XyleRouter\Interfaces\PatternParserInterface;
 /**
  * Class LatinRegex.
  */
-class LatinRegex implements PatternParserInterface
-{
-    const TOKENS_EXPRESSION = '(?P<simplePatterns>{([a-zA-Z0-9]+)})|(?P<complexPatterns>{(?:[\/a-z0-9A-Z\-]+)?\(([a-zA-Z0-9]+)\)(?:[\/a-z0-9A-Z\-]+)?})';
+class LatinRegex implements PatternParserInterface {
 
-    /**
-     * Generator method which will return parameter patterns in sequential order as appears in the
-     * path.
-     *
-     * @param $simplePatterns
-     * @param $complexPatterns
-     * @yield ['tokenName' => 'fullToken']
-     */
-    private function generateTokenPairs($simplePatterns, $complexPatterns)
-    {
-        for ($i = 0; $i < count($simplePatterns); $i++) {
-            $pattern = null;
-            if (mb_strlen($simplePatterns[$i]) > 0) {
-                $pattern = $simplePatterns[$i];
-                $leftBracket = '{';
-                $rightBracket = '}';
-                $leftOffsetValue = 1;
-                $rightOffsetValue = -1;
-            } elseif (mb_strlen($complexPatterns[$i]) > 0) {
-                $pattern = $complexPatterns[$i];
-                $leftBracket = '(';
-                $rightBracket = ')';
-                $leftOffsetValue = 0;
-                $rightOffsetValue = 1;
-            }
+	const TOKENS_EXPRESSION = '(?P<simplePatterns>{([a-zA-Z0-9]+)})|(?P<complexPatterns>{(?:[\/a-z0-9A-Z\-]+)?\(([a-zA-Z0-9]+)\)(?:[\/a-z0-9A-Z\-]+)?})';
 
-            if ($pattern) {
-                // get token name
-                $leftBracketOffset =  mb_stripos($pattern, $leftBracket);
-                $rightBracketOffset = mb_stripos($pattern, $rightBracket);
-                $tokenName = mb_substr($pattern, $leftBracketOffset + $leftOffsetValue, ($rightBracketOffset - $leftBracketOffset) + $rightOffsetValue);
+	/**
+	 * Generator method which will return parameter patterns in sequential order as appears in the
+	 * path.
+	 *
+	 * @param $simplePatterns
+	 * @param $complexPatterns
+	 * @yield ['tokenName' => 'fullToken']
+	 */
+	private function generateTokenPairs($simplePatterns, $complexPatterns) {
 
-                yield str_replace(['(', ')'], '', $tokenName) => [
-                        'full' => $pattern,
-                        'partial' => $tokenName,
-                    ]
-                ;
-            }
-        }
-    }
+		for ($i = 0; $i < count($simplePatterns); $i++) {
+			$pattern = null;
+			if (mb_strlen($simplePatterns[$i]) > 0) {
+				$pattern = $simplePatterns[$i];
+				$leftBracket = '{';
+				$rightBracket = '}';
+				$leftOffsetValue = 1;
+				$rightOffsetValue = -1;
+			} elseif (mb_strlen($complexPatterns[$i]) > 0) {
+				$pattern = $complexPatterns[$i];
+				$leftBracket = '(';
+				$rightBracket = ')';
+				$leftOffsetValue = 0;
+				$rightOffsetValue = 1;
+			}
 
-    /**
-     * @param string $pattern
-     * @param array  $availableTokens
-     * @param array  $optionalAvailableTokens
-     *
-     * @return string
-     *
-     * @throws \InvalidArgumentException
-     */
-    public function parse($pattern, array $availableTokens, array $optionalAvailableTokens)
-    {
+			if ($pattern) {
+				// get token name
+				$leftBracketOffset = mb_stripos($pattern, $leftBracket);
+				$rightBracketOffset = mb_stripos($pattern, $rightBracket);
+				$tokenName = mb_substr($pattern, $leftBracketOffset + $leftOffsetValue, ($rightBracketOffset - $leftBracketOffset) + $rightOffsetValue);
 
-        // Get all {xxx} tokens.
-        if (preg_match_all('#'.static::TOKENS_EXPRESSION.'#', $pattern, $matches)) {
-            // a more complex pattern, requiring individual parameter matching
+				yield str_replace(['(', ')'], '', $tokenName) => [
+					'full' => $pattern,
+					'partial' => $tokenName,
+				];
+			}
+		}
+	}
 
-            if (array_key_exists('simplePatterns', $matches) && array_key_exists('complexPatterns', $matches)) {
-                $simplePatterns = $matches['simplePatterns'];
-                $complexPatterns = $matches['complexPatterns'];
+	/**
+	 * @param string $pattern
+	 * @param array $availableTokens
+	 * @param array $optionalAvailableTokens
+	 *
+	 * @return string
+	 *
+	 * @throws \InvalidArgumentException
+	 */
+	public function parse($pattern, array $availableTokens, array $optionalAvailableTokens) {
 
-                foreach ($this->generateTokenPairs($simplePatterns, $complexPatterns) as $tokenName => $token) {
+		// Get all {xxx} tokens.
+		if (preg_match_all('#' . static::TOKENS_EXPRESSION . '#', $pattern, $matches)) {
+			// a more complex pattern, requiring individual parameter matching
 
-                    // Make sure the corresponding where() definition exists for the token.
-                    if (! array_key_exists($tokenName, $availableTokens)) {
-                        throw new \InvalidArgumentException('URL token is not defined in your where tokens: '.$tokenName);
-                    }
+			if (array_key_exists('simplePatterns', $matches) && array_key_exists('complexPatterns', $matches)) {
+				$simplePatterns = $matches['simplePatterns'];
+				$complexPatterns = $matches['complexPatterns'];
 
-                    // Gather the token information together.
-                    $matcher = $availableTokens[$tokenName];
-                    $interpolation = $matcher->getInterpolationPattern();
-                    $tokenMatching = sprintf('(?P<%s>%s)', $tokenName, $interpolation);
+				foreach ($this->generateTokenPairs($simplePatterns, $complexPatterns) as $tokenName => $token) {
 
-                    // Replace 'token' or '(token)' with REGEX.
-                    $tokenComplexMatching = str_replace(
-                        $token['partial'],
-                        $tokenMatching,
-                        $token['full']
-                    );
+					// Make sure the corresponding where() definition exists for the token.
+					if (!array_key_exists($tokenName, $availableTokens)) {
+						throw new \InvalidArgumentException('->where() missing from your route definition, for token: `' . $tokenName . '` in pattern: `' . $pattern . '`');
+					}
 
-                    // remove { and }
-                    $tokenComplexMatching = mb_substr($tokenComplexMatching, 1, mb_strlen($tokenComplexMatching) - 2);
+					// Gather the token information together.
+					$matcher = $availableTokens[$tokenName];
+					$interpolation = $matcher->getInterpolationPattern();
+					$tokenMatching = sprintf('(?P<%s>%s)', $tokenName, $interpolation);
 
-                    // Is the token optional?
-                    if (in_array($tokenName, $optionalAvailableTokens)) {
-                        $tokenComplexMatching = sprintf('(%s)?', $tokenComplexMatching);
-                    }
+					// Replace 'token' or '(token)' with REGEX.
+					$tokenComplexMatching = str_replace(
+						$token['partial'],
+						$tokenMatching,
+						$token['full']
+					);
 
-                    // Fully replace {token} with (REGEX)
-                    $pattern = str_replace($token['full'], $tokenComplexMatching, $pattern);
-                }
+					// remove { and }
+					$tokenComplexMatching = mb_substr($tokenComplexMatching, 1, mb_strlen($tokenComplexMatching) - 2);
 
-                // switch remaining / to \/ so its compatible with regex.
-                $pattern = preg_replace('#([^\\\\])/#', '$1\/', $pattern);
-            }
-        }
+					// Is the token optional?
+					if (in_array($tokenName, $optionalAvailableTokens)) {
+						$tokenComplexMatching = sprintf('(%s)?', $tokenComplexMatching);
+					}
 
-        // add start and end regex symbols
-        if (mb_substr($pattern, -1) !== '$') {
-            $pattern .= '$';
-        }
-        if (mb_substr($pattern, 0, 1) !== '^') {
-            $pattern = '^'.$pattern;
-        }
+					// Fully replace {token} with (REGEX)
+					$pattern = str_replace($token['full'], $tokenComplexMatching, $pattern);
+				}
 
-        return '#'.$pattern.'#';
-    }
+				// switch remaining / to \/ so its compatible with regex.
+				$pattern = preg_replace('#([^\\\\])/#', '$1\/', $pattern);
+			}
+		}
+
+		// add start and end regex symbols
+		if (mb_substr($pattern, -1) !== '$') {
+			$pattern .= '$';
+		}
+		if (mb_substr($pattern, 0, 1) !== '^') {
+			$pattern = '^' . $pattern;
+		}
+
+		return '#' . $pattern . '#';
+	}
 }

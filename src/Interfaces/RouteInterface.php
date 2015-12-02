@@ -26,4 +26,11 @@ interface RouteInterface
      * @return string
      */
     public function getRoutePattern();
+
+    /**
+     * Gets the parent route, for example a group route.
+     *
+     * @return RouteInterface|null
+     */
+    public function getParent();
 }

@@ -13,6 +13,7 @@ trait RouteClasses {
 		return new $routeClass(
 			$routePattern,
 			($parent) ? $parent->getName() . '.' . $name : $name,
+			$parent,
 			$this->configurations->getConfiguration('pattern_parser_class_namespace', 'xylesoft.xylerouter.shared-classes')
 		);
 	}
@@ -24,6 +25,7 @@ trait RouteClasses {
 			$configurations,
 			$routePattern,
 			($parent) ? $parent->getName() . '.' . $name : $name,
+			$parent,
 			$callback
 		);
 	}

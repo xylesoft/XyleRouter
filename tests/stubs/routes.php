@@ -69,7 +69,7 @@ $router
 	])
 	->handle(function ($parameters, $request) {
 
-		return 'Route Matched.';
+		return 'Index Page Route Matched: ' . $request->getParameter('category') . ' and age: ' . $request->getParameter('age');
 	});
 
 // Matching more complex pattern.
@@ -112,31 +112,32 @@ $router
 			->get('^$', 'index')
 			->handle(function ($parameters, $request) {
 
-				return "admin.index";
+				return "admin.index route.";
 			});
 
 		$router
 			->get('^/users$', 'users')
 			->handle(function ($parameters, $request) {
 
-				return "admin.users";
+				return "admin.users route.";
 			});
 
 		$router
 			->get('^/users/{username}$', 'users-view')
 			->handle(function ($parameters, $request) {
 
-				return "admin.users.view";
-			});
+				return "admin.users.view route.";
+			})
+			->where('username', true, new String());
 
 		$router
 			->group('^/superuser', 'superuser', function($router) {
 
 				$router
-					->get('^/all-users', 'all-users')
+					->post('^/all-users$', 'all-users')
 					->handle(function($parameters, $request) {
 
-						return 'admin.superuser.all-users';
+						return 'admin.superuser.all-users route.';
 					});
 			});
 	});

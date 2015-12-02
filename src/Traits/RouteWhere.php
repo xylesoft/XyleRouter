@@ -4,6 +4,11 @@ namespace Xylesoft\XyleRouter\Traits;
 
 use Xylesoft\XyleRouter\Interfaces\TokenMatcherInterface;
 
+/**
+ * Class RouteWhere
+ *
+ * @package Xylesoft\XyleRouter\Traits
+ */
 trait RouteWhere {
 
 	/**
@@ -23,5 +28,21 @@ trait RouteWhere {
 		}
 
 		return $this;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getTokens() {
+
+		return $this->tokens;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getOptionalTokens() {
+
+		return $this->optionalTokens;
 	}
 }

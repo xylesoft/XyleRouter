@@ -65,20 +65,34 @@ class Group implements RouteInterface, RouteCuttingInterface, RouteStoppingInter
 	protected $configurations;
 
 	/**
+	 * @var RouteInterface
+	 */
+	protected $parent;
+
+	/**
 	 * Construct a new routing rule.
 	 *
 	 * @param Configurations            $configurations
 	 * @param string                    $routePattern The matching pattern of the route.
 	 * @param string                    $name         The unique name of the this route.
+	 * @param RouteInterface|null       $parent            The route's parent if exists.
 	 * @param \Closure                  $childRoutes
 	 */
-	public function __construct(Configurations $configurations, $routePattern, $name, \Closure $childRoutes)
+	public function __construct(Configurations $configurations, $routePattern, $name, RouteInterface $parent = null, \Closure $childRoutes)
 	{
 		$this->configurations = $configurations;
 		$this->regexPattern = $routePattern;
+		$this->parent = $parent;
 		$this->name($name);
 
 		$childRoutes($this);
+	}
+
+	/**
+	 * @return RouteInterface
+	 */
+	public function getParent() {
+		return $this->parent;
 	}
 
 	/**
@@ -90,10 +104,37 @@ class Group implements RouteInterface, RouteCuttingInterface, RouteStoppingInter
 	 */
 	public function match(RequestInterface $request) {
 
+		foreach ($this->routes as $key => $route) {
+
+			$resultFromRoute = $route->match($request);
+			if ($resultFromRoute instanceof RouteInterface) {
+				return $resultFromRoute;
+			}
+		}
+
+		return false;
 	}
 
 	public function getRoutePattern() {
 
-		return $this->parse($this->routePattern);
+		$pattern = $this->regexPattern;
+		if ($this->getParent() instanceof RouteInterface) {
+			$parentRoutePattern = $this->getParent()->getRoutePattern();
+
+			// Clean up incoming route of $ clauses etc.
+			if (mb_substr($parentRoutePattern, -1) === '$') {
+				$parentRoutePattern = mb_substr($parentRoutePattern, mb_strlen($parentRoutePattern) - 1);
+			}
+
+			// Clean up current routes beginning of string symbol ^.
+			if (mb_substr($pattern, 0, 1) === '^') {
+				$pattern = mb_substr($pattern, 1);
+			}
+
+			$pattern = $parentRoutePattern . $pattern;
+		}
+
+		return $pattern;
 	}
+
 }

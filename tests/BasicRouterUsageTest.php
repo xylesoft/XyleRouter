@@ -9,190 +9,270 @@ use Tests\stubs\TokensCallback;
  *
  * Testing the Xylesoft\XyleRouter\Router
  */
-class BasicRouterUsageTest extends PHPUnit_Framework_TestCase
-{
+class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 
-    private function getRouter() {
+	private function getRouter() {
 
-        $config = new \Xylesoft\XyleRouter\Configuration\Configurations();
-        // define the Route class name
-        $config->registerConfiguration('route_class_namespace', '\Xylesoft\XyleRouter\Route', 'xylesoft.xylerouter.classes');
-        $config->registerConfiguration('route_group_class_namespace', '\Xylesoft\XyleRouter\Group', 'xylesoft.xylerouter.classes');
-        $config->registerConfiguration('header_class_namespace', '\Xylesoft\XyleRouter\Header', 'xylesoft.xylerouter.classes');
-        $config->registerConfiguration('pattern_parser_class_namespace', new \Xylesoft\XyleRouter\PatternParsers\LatinRegex(), 'xylesoft.xylerouter.shared-classes');
+		$config = new \Xylesoft\XyleRouter\Configuration\Configurations();
+		// define the Route class name
+		$config->registerConfiguration('route_class_namespace', '\Xylesoft\XyleRouter\Route', 'xylesoft.xylerouter.classes');
+		$config->registerConfiguration('route_group_class_namespace', '\Xylesoft\XyleRouter\Group', 'xylesoft.xylerouter.classes');
+		$config->registerConfiguration('header_class_namespace', '\Xylesoft\XyleRouter\Header', 'xylesoft.xylerouter.classes');
+		$config->registerConfiguration('pattern_parser_class_namespace', new \Xylesoft\XyleRouter\PatternParsers\LatinRegex(), 'xylesoft.xylerouter.shared-classes');
 
-        $router = new Router($config);
-        $router->initialize(__DIR__.'/stubs/routes.php');
+		$router = new Router($config);
+		$router->initialize(__DIR__ . '/stubs/routes.php');
 
-        return $router;
-    }
+		return $router;
+	}
 
-    public function testRouterClassLoad()
-    {
-        $this->assertInstanceOf('\Xylesoft\XyleRouter\Router', $this->getRouter());
-    }
+	public function testRouterClassLoad() {
 
-    /**
-     * @expectedException \RuntimeException
-     * @depends testRouterClassLoad
-     */
-    public function testRouteImplementationCheck()
-    {
-        $config = new \Xylesoft\XyleRouter\Configuration\Configurations();
-        // define the Route class name
-        $config->registerConfiguration('route_class_namespace', '\Tests\stubs\FakeRoute', 'xylesoft.xylerouter.classes');
-        $config->registerConfiguration('route_group_class_namespace', '\Xylesoft\XyleRouter\Group', 'xylesoft.xylerouter.classes');
-        $config->registerConfiguration('header_class_namespace', '\Xylesoft\XyleRouter\Header', 'xylesoft.xylerouter.classes');
-        $config->registerConfiguration('pattern_parser_class_namespace', new \Xylesoft\XyleRouter\PatternParsers\LatinRegex(), 'xylesoft.xylerouter.shared-classes');
+		$this->assertInstanceOf('\Xylesoft\XyleRouter\Router', $this->getRouter());
+	}
 
-        $router = new Router($config);
-    }
+	/**
+	 * @expectedException \RuntimeException
+	 * @depends testRouterClassLoad
+	 */
+	public function testRouteImplementationCheck() {
 
-    /**
-     * @depends testRouterClassLoad
-     */
-    public function testDefinition()
-    {
+		$config = new \Xylesoft\XyleRouter\Configuration\Configurations();
+		// define the Route class name
+		$config->registerConfiguration('route_class_namespace', '\Tests\stubs\FakeRoute', 'xylesoft.xylerouter.classes');
+		$config->registerConfiguration('route_group_class_namespace', '\Xylesoft\XyleRouter\Group', 'xylesoft.xylerouter.classes');
+		$config->registerConfiguration('header_class_namespace', '\Xylesoft\XyleRouter\Header', 'xylesoft.xylerouter.classes');
+		$config->registerConfiguration('pattern_parser_class_namespace', new \Xylesoft\XyleRouter\PatternParsers\LatinRegex(), 'xylesoft.xylerouter.shared-classes');
 
-        $routes = $this->getRouter()->getRoutes();
-//        var_dump($routes);die;
-        $this->assertCount(6, $routes);
-        $this->assertArrayHasKey('locale', $routes);
-        $this->assertArrayHasKey('welcome-page', $routes);
-        $this->assertArrayHasKey('index-page', $routes);
-        $this->assertArrayHasKey('users-statistic-view', $routes);
-        $this->assertArrayHasKey('threads', $routes);
-        $this->assertArrayHasKey('admin', $routes);
+		new Router($config);
+	}
 
-        // check if group route keys exist
-        $routeGroup = $routes['threads']->getRoutes();
-        $this->assertArrayHasKey('threads.listing', $routeGroup);
-        $this->assertArrayHasKey('threads.item', $routeGroup);
+	/**
+	 * @depends testRouterClassLoad
+	 */
+	public function testDefinition() {
 
-        $routeGroup = $routes['admin']->getRoutes();
-        $this->assertArrayHasKey('admin.index', $routeGroup);
-        $this->assertArrayHasKey('admin.users', $routeGroup);
-        $this->assertArrayHasKey('admin.users-view', $routeGroup);
-        $this->assertArrayHasKey('admin.superuser', $routeGroup);
+		$routes = $this->getRouter()->getRoutes();
+		$this->assertCount(6, $routes);
+		$this->assertArrayHasKey('locale', $routes);
+		$this->assertArrayHasKey('welcome-page', $routes);
+		$this->assertArrayHasKey('index-page', $routes);
+		$this->assertArrayHasKey('users-statistic-view', $routes);
+		$this->assertArrayHasKey('threads', $routes);
+		$this->assertArrayHasKey('admin', $routes);
+		$this->assertEquals('locale', $routes['locale']->getName());
+		$this->assertEquals('welcome-page', $routes['welcome-page']->getName());
+		$this->assertEquals('index-page', $routes['index-page']->getName());
+		$this->assertEquals('users-statistic-view', $routes['users-statistic-view']->getName());
+		$this->assertEquals('threads', $routes['threads']->getName());
+		$this->assertEquals('admin', $routes['admin']->getName());
 
-        $routeGroup = $routeGroup['admin.superuser']->getRoutes();
-        $this->assertArrayHasKey('admin.superuser.all-users', $routeGroup);
+		// check if group route keys exist
+		$routeGroup = $routes['threads']->getRoutes();
+		$this->assertArrayHasKey('threads.listing', $routeGroup);
+		$this->assertArrayHasKey('threads.item', $routeGroup);
+		$this->assertEquals('threads.listing', $routeGroup['threads.listing']->getName());
+		$this->assertEquals('threads.item', $routeGroup['threads.item']->getName());
 
+		$routeGroup = $routes['admin']->getRoutes();
+		$this->assertArrayHasKey('admin.index', $routeGroup);
+		$this->assertArrayHasKey('admin.users', $routeGroup);
+		$this->assertArrayHasKey('admin.users-view', $routeGroup);
+		$this->assertArrayHasKey('admin.superuser', $routeGroup);
+		$this->assertEquals('admin.index', $routeGroup['admin.index']->getName());
+		$this->assertEquals('admin.users', $routeGroup['admin.users']->getName());
+		$this->assertEquals('admin.users-view', $routeGroup['admin.users-view']->getName());
+		$this->assertEquals('admin.superuser', $routeGroup['admin.superuser']->getName());
 
-        //        $this->assertEquals('index.page', $routes[0]->getName());
-//        $this->assertEquals('#^\/hello\/(?P<category>[^\/]+)(\/(?P<age>\d+))?$#', $routes[0]->getRoutePattern());
-//        $this->assertInstanceOf('\Closure', $routes[0]->getHandler());
-//        $this->assertEquals(['GET'], $routes[0]->getMethods());
-//        $this->assertEquals(['age' => '/(32)'], $routes[0]->getDefaults());
-//
-//        $this->assertEquals('users.statistic.view', $routes[1]->getName());
-//        $this->assertEquals('#^\/users\/(?P<name>[^\/]+)\/statistics\/(?P<statistic>[^\/]+)(\/(?P<sort>[^\/]+))?(\/special-offer-for-(?P<clientsForeName>[^\/]+)-only-today)?$#', $routes[1]->getRoutePattern());
-//        $this->assertInstanceOf('\Closure', $routes[1]->getHandler());
-//        $this->assertEquals(['GET'], $routes[1]->getMethods());
-//        $this->assertEquals(['sort' => '/(id)'], $routes[1]->getDefaults());
-    }
+		$routeGroup = $routeGroup['admin.superuser']->getRoutes();
+		$this->assertArrayHasKey('admin.superuser.all-users', $routeGroup);
+		$this->assertEquals('admin.superuser.all-users', $routeGroup['admin.superuser.all-users']->getName());
+	}
 
-    public function testBasicRouteMatching() {
+	public function testBasicRouteMatching() {
 
-    }
+		$router = $this->getRouter();
 
-//    /**
-//     * @depends testDefinition
-//     */
-//    public function testMatching()
-//    {
-//        $router = new Router('\Xylesoft\XyleRouter\Route');
-//        $router->initialize(__DIR__.'/stubs/routes.php');
-//
-//        // Invalid Route
-//        $result = $router->dispatch(
-//            new DummyRequest('/hello')
-//        );
-//        $this->assertEquals(false, $result, "Invalid route didn't return false.");
-//
-//        // Invalid Route with parameter
-//        $result = $router->dispatch(
-//            new DummyRequest('/goodbye/cats')
-//        );
-//        $this->assertEquals(false, $result, "Invalid route with parameter didn't return false");
-//
-//        // Valid route without optional parameter
-//        $result = $router->dispatch(
-//            new DummyRequest('/hello/cats')
-//        );
-//        $this->assertFalse($result, 'test failed for {category} string min length of 5 on /hello/cats');
-//        $result = $router->dispatch(
-//            new DummyRequest('/hello/kittens')
-//        );
-//        $this->assertNotFalse($result, 'Dispatch result for /hello/kittens is false');
-//        $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid simple route didn't return RouteInterface");
-//        $this->assertEquals('index.page', $result->getName());
-//
-//        // Validate route with optional parameter
-//        $result = $router->dispatch(
-//            new DummyRequest('/hello/cats/20')
-//        );
-//        $this->assertFalse($result, 'test failed for {category} string min length of 5 on /hello/cats/20 with age parameter.');
-//
-//        $result = $router->dispatch(
-//            new DummyRequest('/hello/kittens/20')
-//        );
-//        $this->assertNotFalse($result, 'Dispatch result for /hello/kittens/20 is false');
-//        $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid parameter route didn't return RouteInterface");
-//        $this->assertEquals('index.page', $result->getName());
-//
-//        // age too high
-//        $result = $router->dispatch(
-//            new DummyRequest('/hello/cats/2000')
-//        );
-//        $this->assertFalse($result, 'test failed on /hello/cats/2000 with too high age parameter.');
-//
-//        // Check if parameters are set onto request.
-//        $req = new DummyRequest('/hello/kittens/20');
-//        $result = $router->dispatch($req);
-//
-//        $this->assertEquals('index.page', $result->getName());
-//        $this->assertArrayHasKey('category', $req->getParameters());
-//        $this->assertArrayHasKey('age', $req->getParameters());
-//        $this->assertEquals('kittens', $req->getParameter('category'));
-//        $this->assertEquals('20', $req->getParameter('age'));
-//
-//        // Check if default parameter is populated.
-//        $req = new DummyRequest('/hello/kittens');
-//        $result = $router->dispatch($req);
-//
-//        $this->assertEquals('index.page', $result->getName());
-//        $this->assertArrayHasKey('category', $req->getParameters());
-//        $this->assertArrayHasKey('age', $req->getParameters());
-//        $this->assertEquals('kittens', $req->getParameter('category'));
-//        $this->assertEquals('32', $req->getParameter('age'));
-//
-//        // Check if more complex pattern works
-//        $req = new DummyRequest('/users/pancho/statistics/breed/id');
-//        $result = $router->dispatch($req);
-//
-//        $this->assertEquals('users.statistic.view', $result->getName());
-//        $this->assertArrayHasKey('name', $req->getParameters());
-//        $this->assertArrayHasKey('statistic', $req->getParameters());
-//        $this->assertArrayHasKey('sort', $req->getParameters());
-//
-//        $this->assertEquals('pancho', $req->getParameter('name'));
-//        $this->assertEquals('breed', $req->getParameter('statistic'));
-//        $this->assertEquals('id', $req->getParameter('sort'));
-//
-//        // Check if full more complex pattern works
-//        $req = new DummyRequest('/users/pancho/statistics/breed/claw-size/special-offer-for-pancho-only-today');
-//        $result = $router->dispatch($req);
-//
-//        $this->assertEquals('users.statistic.view', $result->getName());
-//        $this->assertArrayHasKey('name', $req->getParameters());
-//        $this->assertArrayHasKey('statistic', $req->getParameters());
-//        $this->assertArrayHasKey('sort', $req->getParameters());
-//        $this->assertArrayHasKey('clientsForeName', $req->getParameters());
-//
-//        $this->assertEquals('pancho', $req->getParameter('name'));
-//        $this->assertEquals('breed', $req->getParameter('statistic'));
-//        $this->assertEquals('claw-size', $req->getParameter('sort'));
-//        $this->assertEquals('pancho', $req->getParameter('clientsForeName'));
-//    }
+		// Non-existent route test
+		$result = $router->dispatch(
+			new DummyRequest('/hello')
+		);
+		$this->assertFalse($result);
+
+		// root level route test.
+		$request = new DummyRequest('/welcome');
+		$result = $router->dispatch($request);
+		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+		$this->assertEquals('welcome-page', $result->getName());
+		$this->assertEquals('#^/welcome$#', $result->getRoutePattern());
+		$this->assertTrue($result->getStop());
+		$this->assertFalse($result->getCut());
+		$this->assertEquals(['GET'], $result->getMethods());
+		$controller = $result->getHandler();
+		$this->assertEquals('Simple Route Matched.', $controller([], $request));
+	}
+
+	public function testGroupRouteMatching() {
+
+		$router = $this->getRouter();
+		// Non-existent route test
+		$result = $router->dispatch(
+			new DummyRequest('/admin/moose')
+		);
+		$this->assertFalse($result);
+
+		// First level group test
+		$request = new DummyRequest('/admin');
+		$result = $router->dispatch($request);
+		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+		$this->assertEquals('admin.index', $result->getName());
+		$this->assertEquals('#^/admin$#', $result->getRoutePattern());
+		$this->assertTrue($result->getStop());
+		$this->assertFalse($result->getCut());
+		$this->assertEquals(['GET'], $result->getMethods());
+		$controller = $result->getHandler();
+		$this->assertEquals('admin.index route.', $controller([], $request));
+
+		// Second level group test
+		$request = new DummyRequest('/admin/superuser/all-users');
+		$result = $router->dispatch($request);
+		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+		$this->assertEquals('admin.superuser.all-users', $result->getName());
+		$this->assertEquals('#^/admin/superuser/all-users$#', $result->getRoutePattern());
+		$this->assertTrue($result->getStop());
+		$this->assertFalse($result->getCut());
+		$this->assertEquals(['POST'], $result->getMethods());
+		$controller = $result->getHandler();
+		$this->assertEquals('admin.superuser.all-users route.', $controller([], $request));
+	}
+
+	public function testUrlParametersForBasicRouteMatching() {
+
+		$router = $this->getRouter();
+		$request = new DummyRequest('/hello/random-category');
+		$result = $router->dispatch($request);
+		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+		$this->assertEquals('index-page', $result->getName());
+		$this->assertEquals('#^\/hello\/(?P<category>[^\/]+)(\/(?P<age>\d+))?$#', $result->getRoutePattern());
+		$this->assertTrue($result->getStop());
+		$this->assertFalse($result->getCut());
+		$this->assertEquals(['GET'], $result->getMethods());
+		$controller = $result->getHandler();
+		$this->assertEquals('Index Page Route Matched: random-category and age: 32', $controller([], $request));
+
+		$request = new DummyRequest('/hello/17-random-category/89');
+		$result = $router->dispatch($request);
+		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+		$this->assertEquals('index-page', $result->getName());
+		$this->assertEquals('#^\/hello\/(?P<category>[^\/]+)(\/(?P<age>\d+))?$#', $result->getRoutePattern());
+		$this->assertTrue($result->getStop());
+		$this->assertFalse($result->getCut());
+		$this->assertEquals(['GET'], $result->getMethods());
+		$controller = $result->getHandler();
+		$this->assertEquals('Index Page Route Matched: 17-random-category and age: 89', $controller([], $request));
+
+		$request = new DummyRequest('/hello/17-random-category/hello');
+		$result = $router->dispatch($request);
+		$this->assertFalse($result);
+	}
+
+	//    /**
+	//     * @depends testDefinition
+	//     */
+	//    public function testMatching()
+	//    {
+	//        $router = new Router('\Xylesoft\XyleRouter\Route');
+	//        $router->initialize(__DIR__.'/stubs/routes.php');
+	//
+	//        // Invalid Route
+	//        $result = $router->dispatch(
+	//            new DummyRequest('/hello')
+	//        );
+	//        $this->assertEquals(false, $result, "Invalid route didn't return false.");
+	//
+	//        // Invalid Route with parameter
+	//        $result = $router->dispatch(
+	//            new DummyRequest('/goodbye/cats')
+	//        );
+	//        $this->assertEquals(false, $result, "Invalid route with parameter didn't return false");
+	//
+	//        // Valid route without optional parameter
+	//        $result = $router->dispatch(
+	//            new DummyRequest('/hello/cats')
+	//        );
+	//        $this->assertFalse($result, 'test failed for {category} string min length of 5 on /hello/cats');
+	//        $result = $router->dispatch(
+	//            new DummyRequest('/hello/kittens')
+	//        );
+	//        $this->assertNotFalse($result, 'Dispatch result for /hello/kittens is false');
+	//        $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid simple route didn't return RouteInterface");
+	//        $this->assertEquals('index.page', $result->getName());
+	//
+	//        // Validate route with optional parameter
+	//        $result = $router->dispatch(
+	//            new DummyRequest('/hello/cats/20')
+	//        );
+	//        $this->assertFalse($result, 'test failed for {category} string min length of 5 on /hello/cats/20 with age parameter.');
+	//
+	//        $result = $router->dispatch(
+	//            new DummyRequest('/hello/kittens/20')
+	//        );
+	//        $this->assertNotFalse($result, 'Dispatch result for /hello/kittens/20 is false');
+	//        $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid parameter route didn't return RouteInterface");
+	//        $this->assertEquals('index.page', $result->getName());
+	//
+	//        // age too high
+	//        $result = $router->dispatch(
+	//            new DummyRequest('/hello/cats/2000')
+	//        );
+	//        $this->assertFalse($result, 'test failed on /hello/cats/2000 with too high age parameter.');
+	//
+	//        // Check if parameters are set onto request.
+	//        $req = new DummyRequest('/hello/kittens/20');
+	//        $result = $router->dispatch($req);
+	//
+	//        $this->assertEquals('index.page', $result->getName());
+	//        $this->assertArrayHasKey('category', $req->getParameters());
+	//        $this->assertArrayHasKey('age', $req->getParameters());
+	//        $this->assertEquals('kittens', $req->getParameter('category'));
+	//        $this->assertEquals('20', $req->getParameter('age'));
+	//
+	//        // Check if default parameter is populated.
+	//        $req = new DummyRequest('/hello/kittens');
+	//        $result = $router->dispatch($req);
+	//
+	//        $this->assertEquals('index.page', $result->getName());
+	//        $this->assertArrayHasKey('category', $req->getParameters());
+	//        $this->assertArrayHasKey('age', $req->getParameters());
+	//        $this->assertEquals('kittens', $req->getParameter('category'));
+	//        $this->assertEquals('32', $req->getParameter('age'));
+	//
+	//        // Check if more complex pattern works
+	//        $req = new DummyRequest('/users/pancho/statistics/breed/id');
+	//        $result = $router->dispatch($req);
+	//
+	//        $this->assertEquals('users.statistic.view', $result->getName());
+	//        $this->assertArrayHasKey('name', $req->getParameters());
+	//        $this->assertArrayHasKey('statistic', $req->getParameters());
+	//        $this->assertArrayHasKey('sort', $req->getParameters());
+	//
+	//        $this->assertEquals('pancho', $req->getParameter('name'));
+	//        $this->assertEquals('breed', $req->getParameter('statistic'));
+	//        $this->assertEquals('id', $req->getParameter('sort'));
+	//
+	//        // Check if full more complex pattern works
+	//        $req = new DummyRequest('/users/pancho/statistics/breed/claw-size/special-offer-for-pancho-only-today');
+	//        $result = $router->dispatch($req);
+	//
+	//        $this->assertEquals('users.statistic.view', $result->getName());
+	//        $this->assertArrayHasKey('name', $req->getParameters());
+	//        $this->assertArrayHasKey('statistic', $req->getParameters());
+	//        $this->assertArrayHasKey('sort', $req->getParameters());
+	//        $this->assertArrayHasKey('clientsForeName', $req->getParameters());
+	//
+	//        $this->assertEquals('pancho', $req->getParameter('name'));
+	//        $this->assertEquals('breed', $req->getParameter('statistic'));
+	//        $this->assertEquals('claw-size', $req->getParameter('sort'));
+	//        $this->assertEquals('pancho', $req->getParameter('clientsForeName'));
+	//    }
 }
