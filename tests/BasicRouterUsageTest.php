@@ -15,9 +15,9 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 
 		$config = new \Xylesoft\XyleRouter\Configuration\Configurations();
 		// define the Route class name
-		$config->registerConfiguration('route_class_namespace', '\Xylesoft\XyleRouter\Route', 'xylesoft.xylerouter.classes');
-		$config->registerConfiguration('route_group_class_namespace', '\Xylesoft\XyleRouter\Group', 'xylesoft.xylerouter.classes');
-		$config->registerConfiguration('header_class_namespace', '\Xylesoft\XyleRouter\Header', 'xylesoft.xylerouter.classes');
+		$config->registerConfiguration('route_class_namespace', '\Xylesoft\XyleRouter\Route\Route', 'xylesoft.xylerouter.classes');
+		$config->registerConfiguration('route_group_class_namespace', '\Xylesoft\XyleRouter\Route\Group', 'xylesoft.xylerouter.classes');
+		$config->registerConfiguration('header_class_namespace', '\Xylesoft\XyleRouter\Route\Header', 'xylesoft.xylerouter.classes');
 		$config->registerConfiguration('pattern_parser_class_namespace', new \Xylesoft\XyleRouter\PatternParsers\LatinRegex(), 'xylesoft.xylerouter.shared-classes');
 
 		$router = new Router($config);
@@ -40,7 +40,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 		$config = new \Xylesoft\XyleRouter\Configuration\Configurations();
 		// define the Route class name
 		$config->registerConfiguration('route_class_namespace', '\Tests\stubs\FakeRoute', 'xylesoft.xylerouter.classes');
-		$config->registerConfiguration('route_group_class_namespace', '\Xylesoft\XyleRouter\Group', 'xylesoft.xylerouter.classes');
+		$config->registerConfiguration('route_group_class_namespace', '\Xylesoft\XyleRouter\Route\Group', 'xylesoft.xylerouter.classes');
 		$config->registerConfiguration('header_class_namespace', '\Xylesoft\XyleRouter\Header', 'xylesoft.xylerouter.classes');
 		$config->registerConfiguration('pattern_parser_class_namespace', new \Xylesoft\XyleRouter\PatternParsers\LatinRegex(), 'xylesoft.xylerouter.shared-classes');
 
@@ -102,7 +102,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 		// root level route test.
 		$request = new DummyRequest('/welcome');
 		$result = $router->dispatch($request);
-		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route\Route', $result);
 		$this->assertEquals('welcome-page', $result->getName());
 		$this->assertEquals('#^/welcome$#', $result->getRoutePattern());
 		$this->assertTrue($result->getStop());
@@ -124,7 +124,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 		// First level group test
 		$request = new DummyRequest('/admin');
 		$result = $router->dispatch($request);
-		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route\Route', $result);
 		$this->assertEquals('admin.index', $result->getName());
 		$this->assertEquals('#^/admin$#', $result->getRoutePattern());
 		$this->assertTrue($result->getStop());
@@ -136,7 +136,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 		// Second level group test
 		$request = new DummyRequest('/admin/superuser/all-users');
 		$result = $router->dispatch($request);
-		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route\Route', $result);
 		$this->assertEquals('admin.superuser.all-users', $result->getName());
 		$this->assertEquals('#^/admin/superuser/all-users$#', $result->getRoutePattern());
 		$this->assertTrue($result->getStop());
@@ -151,7 +151,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 		$router = $this->getRouter();
 		$request = new DummyRequest('/hello/random-category');
 		$result = $router->dispatch($request);
-		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route\Route', $result);
 		$this->assertEquals('index-page', $result->getName());
 		$this->assertEquals('#^\/hello\/(?P<category>[^\/]+)(\/(?P<age>\d+))?$#', $result->getRoutePattern());
 		$this->assertTrue($result->getStop());
@@ -162,7 +162,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 
 		$request = new DummyRequest('/hello/17-random-category/89');
 		$result = $router->dispatch($request);
-		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route', $result);
+		$this->assertInstanceOf('\Xylesoft\XyleRouter\Route\Route', $result);
 		$this->assertEquals('index-page', $result->getName());
 		$this->assertEquals('#^\/hello\/(?P<category>[^\/]+)(\/(?P<age>\d+))?$#', $result->getRoutePattern());
 		$this->assertTrue($result->getStop());

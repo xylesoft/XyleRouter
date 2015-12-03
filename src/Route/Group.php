@@ -1,6 +1,6 @@
 <?php
 
-namespace Xylesoft\XyleRouter;
+namespace Xylesoft\XyleRouter\Route;
 
 use Xylesoft\XyleRouter\Configuration\Configurations;
 use Xylesoft\XyleRouter\Interfaces\RequestInterface;
