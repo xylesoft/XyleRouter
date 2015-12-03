@@ -5,7 +5,7 @@ namespace Xylesoft\XyleRouter;
 use Xylesoft\XyleRouter\Configuration\Configurations;
 use Xylesoft\XyleRouter\Interfaces\RequestInterface;
 use Xylesoft\XyleRouter\Interfaces\Route\RouteStoppingInterface;
-use Xylesoft\XyleRouter\Interfaces\RouteInterface;
+use Xylesoft\XyleRouter\Interfaces\Route\RouteInterface;
 use Xylesoft\XyleRouter\Traits\HttpMethodsFacade;
 use Xylesoft\XyleRouter\Traits\RouteClasses;
 
@@ -54,11 +54,11 @@ class Router {
 	protected function validateRouteClasses() {
 
 		if (!$this->getRouteClass('nothing', 'testing') instanceof RouteInterface) {
-			throw new \RuntimeException('config: route_class_namespace class does not implement \Xylesoft\XyleRouter\Interfaces\RouteInterface');
+			throw new \RuntimeException('config: route_class_namespace class does not implement \Xylesoft\XyleRouter\Interfaces\Route\RouteInterface');
 		}
 
 		if (!$this->getRouteGroupClass($this->configurations, 'nothing', 'testing', function($router) {}, null) instanceof RouteInterface) {
-			throw new \RuntimeException('config: route_group_class_namespace class does not implement \Xylesoft\XyleRouter\Interfaces\RouteInterface');
+			throw new \RuntimeException('config: route_group_class_namespace class does not implement \Xylesoft\XyleRouter\Interfaces\Route\RouteInterface');
 		}
 
 		//		if (!$this->getRouteHeaderClass('nothing', 'testing') instanceof RouteInterface) {
@@ -94,7 +94,7 @@ class Router {
 	 *
 	 * @param RequestInterface $request
 	 *
-	 * @return \Xylesoft\XyleRouter\Interfaces\RouteInterface|false
+	 * @return \Xylesoft\XyleRouter\Interfaces\Route\RouteInterface|false
 	 */
 	public function dispatch(RequestInterface $request) {
 

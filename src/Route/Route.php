@@ -10,7 +10,7 @@ use Xylesoft\XyleRouter\Interfaces\Route\RouteMethodsInterface;
 use Xylesoft\XyleRouter\Interfaces\Route\RouteNamingInterface;
 use Xylesoft\XyleRouter\Interfaces\Route\RouteStoppingInterface;
 use Xylesoft\XyleRouter\Interfaces\Route\RouteWhereInterface;
-use Xylesoft\XyleRouter\Interfaces\RouteInterface;
+use Xylesoft\XyleRouter\Interfaces\Route\RouteInterface;
 use Xylesoft\XyleRouter\PatternParsers\LatinRegex;
 use Xylesoft\XyleRouter\Traits\RouteCut;
 use Xylesoft\XyleRouter\Traits\RouteDefaults;

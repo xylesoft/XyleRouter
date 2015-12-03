@@ -3,7 +3,7 @@
 namespace Xylesoft\XyleRouter\Traits;
 
 use Xylesoft\XyleRouter\Interfaces\Route\RouteMethodsInterface;
-use Xylesoft\XyleRouter\Interfaces\RouteInterface;
+use Xylesoft\XyleRouter\Interfaces\Route\RouteInterface;
 
 /**
  * Class HttpMethodsFacade

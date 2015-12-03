@@ -67,13 +67,15 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('threads', $routes['threads']->getName());
 		$this->assertEquals('admin', $routes['admin']->getName());
 
-		// check if group route keys exist
+		// check if group route keys exiest
+		$this->assertInstanceOf('Xylesoft\XyleRouter\Route\Group', $routes['threads']);
 		$routeGroup = $routes['threads']->getRoutes();
 		$this->assertArrayHasKey('threads.listing', $routeGroup);
 		$this->assertArrayHasKey('threads.item', $routeGroup);
 		$this->assertEquals('threads.listing', $routeGroup['threads.listing']->getName());
 		$this->assertEquals('threads.item', $routeGroup['threads.item']->getName());
 
+		$this->assertInstanceOf('Xylesoft\XyleRouter\Route\Group', $routes['admin']);
 		$routeGroup = $routes['admin']->getRoutes();
 		$this->assertArrayHasKey('admin.index', $routeGroup);
 		$this->assertArrayHasKey('admin.users', $routeGroup);
@@ -84,6 +86,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('admin.users-view', $routeGroup['admin.users-view']->getName());
 		$this->assertEquals('admin.superuser', $routeGroup['admin.superuser']->getName());
 
+		$this->assertInstanceOf('Xylesoft\XyleRouter\Route\Group', $routeGroup['admin.superuser']);
 		$routeGroup = $routeGroup['admin.superuser']->getRoutes();
 		$this->assertArrayHasKey('admin.superuser.all-users', $routeGroup);
 		$this->assertEquals('admin.superuser.all-users', $routeGroup['admin.superuser.all-users']->getName());
@@ -205,7 +208,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 	//            new DummyRequest('/hello/kittens')
 	//        );
 	//        $this->assertNotFalse($result, 'Dispatch result for /hello/kittens is false');
-	//        $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid simple route didn't return RouteInterface");
+	//        $this->assertContains('Xylesoft\XyleRouter\Interfaces\Route\RouteInterface', array_values(class_implements($result)), "Valid simple route didn't return RouteInterface");
 	//        $this->assertEquals('index.page', $result->getName());
 	//
 	//        // Validate route with optional parameter
@@ -218,7 +221,7 @@ class BasicRouterUsageTest extends PHPUnit_Framework_TestCase {
 	//            new DummyRequest('/hello/kittens/20')
 	//        );
 	//        $this->assertNotFalse($result, 'Dispatch result for /hello/kittens/20 is false');
-	//        $this->assertContains('Xylesoft\XyleRouter\Interfaces\RouteInterface', array_values(class_implements($result)), "Valid parameter route didn't return RouteInterface");
+	//        $this->assertContains('Xylesoft\XyleRouter\Interfaces\Route\RouteInterface', array_values(class_implements($result)), "Valid parameter route didn't return RouteInterface");
 	//        $this->assertEquals('index.page', $result->getName());
 	//
 	//        // age too high

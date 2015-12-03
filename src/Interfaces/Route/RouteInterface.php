@@ -1,7 +1,8 @@
 <?php
 
-namespace Xylesoft\XyleRouter\Interfaces;
+namespace Xylesoft\XyleRouter\Interfaces\Route;
 
+use Xylesoft\XyleRouter\Interfaces\RequestInterface;
 
 /**
  * Interface RouteInterface.

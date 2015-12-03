@@ -3,7 +3,7 @@
 namespace Xylesoft\XyleRouter\Traits;
 
 use Xylesoft\XyleRouter\Configuration\Configurations;
-use Xylesoft\XyleRouter\Interfaces\RouteInterface;
+use Xylesoft\XyleRouter\Interfaces\Route\RouteInterface;
 
 trait RouteClasses {
 
