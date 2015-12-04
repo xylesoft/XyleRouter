@@ -18,6 +18,11 @@ interface RequestInterface
     public function getUrl();
 
     /**
+     * @param string $url
+     */
+    public function setUrl($url);
+
+    /**
      * Get the GET parameters from the Request.
      *
      * @return array

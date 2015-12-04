@@ -12,14 +12,14 @@ class LatinRegex implements PatternParserInterface {
 	const TOKENS_EXPRESSION = '(?P<simplePatterns>{([a-zA-Z0-9]+)})|(?P<complexPatterns>{(?:[\/a-z0-9A-Z\-]+)?\(([a-zA-Z0-9]+)\)(?:[\/a-z0-9A-Z\-]+)?})';
 
 	/**
-	 * Generator method which will return parameter patterns in sequential order as appears in the
-	 * path.
+	 * Generator which will return parameter patterns in sequential order as appears in the
+	 * path URL route value.
 	 *
-	 * @param $simplePatterns
-	 * @param $complexPatterns
-	 * @yield ['tokenName' => 'fullToken']
+	 * @param array $simplePatterns		An array of simple patterns such as '../{cat}'
+	 * @param array $complexPatterns	An array of complex patterns such as '..{/(cat)}'
+	 * @yield ['parameter's token name' => 'fullToken']
 	 */
-	private function generateTokenPairs($simplePatterns, $complexPatterns) {
+	protected function yieldParameterTokens(array $simplePatterns, array $complexPatterns) {
 
 		for ($i = 0; $i < count($simplePatterns); $i++) {
 			$pattern = null;
@@ -52,6 +52,8 @@ class LatinRegex implements PatternParserInterface {
 	}
 
 	/**
+	 * Parses the route definition parameter tokens into valid REGEX.
+	 *
 	 * @param string $pattern
 	 * @param array $availableTokens
 	 * @param array $optionalAvailableTokens
@@ -62,15 +64,16 @@ class LatinRegex implements PatternParserInterface {
 	 */
 	public function parse($pattern, array $availableTokens, array $optionalAvailableTokens) {
 
-		// Get all {xxx} tokens.
+		$hasStartAnchor = mb_substr($pattern, 0, 1) === '^';
+		$hasEndAnchor = mb_substr($pattern, -1) === '$';
+
+		// Find and process all found parameter tokens e.g /{xxx}.
 		if (preg_match_all('#' . static::TOKENS_EXPRESSION . '#', $pattern, $matches)) {
 			// a more complex pattern, requiring individual parameter matching
 
 			if (array_key_exists('simplePatterns', $matches) && array_key_exists('complexPatterns', $matches)) {
-				$simplePatterns = $matches['simplePatterns'];
-				$complexPatterns = $matches['complexPatterns'];
 
-				foreach ($this->generateTokenPairs($simplePatterns, $complexPatterns) as $tokenName => $token) {
+				foreach ($this->yieldParameterTokens($matches['simplePatterns'], $matches['complexPatterns']) as $tokenName => $token) {
 
 					// Make sure the corresponding where() definition exists for the token.
 					if (!array_key_exists($tokenName, $availableTokens)) {
@@ -107,10 +110,10 @@ class LatinRegex implements PatternParserInterface {
 		}
 
 		// add start and end regex symbols
-		if (mb_substr($pattern, -1) !== '$') {
+		if ($hasEndAnchor && mb_substr($pattern, -1) !== '$') {
 			$pattern .= '$';
 		}
-		if (mb_substr($pattern, 0, 1) !== '^') {
+		if ($hasStartAnchor && mb_substr($pattern, 0, 1) !== '^') {
 			$pattern = '^' . $pattern;
 		}
 

@@ -12,6 +12,8 @@
     syntaxCheck="true"
 >
     <testsuite name="XyleRouting">
+        <directory>./tests/Route/</directory>
+        <directory>./tests/PatternParsers/</directory>
         <directory>./tests/</directory>
     </testsuite>
     <filter>

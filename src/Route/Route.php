@@ -169,26 +169,29 @@ class Route implements RouteInterface, RouteCuttingInterface, RouteStoppingInter
 	/**
 	 * Build the REGEX pattern which will match against the incoming path.
 	 *
-	 * @param string $pattern
+	 * @param string    $pattern
+     * @param bool      $treverseTree   Whether to prepend the parent nodes REGEX patterns. (Default: true)
 	 *
 	 * @return string
 	 */
-	private function parse($pattern) {
+	private function parse($pattern, $treverseTree = true) {
 
 		if (!$this->regexPattern) {
 
 			$tokens = $this->tokens;
 			$optionalTokens = $this->optionalTokens;
+
 			// check if there are parents
-			if ($this->getParent() instanceof RouteInterface) {
+			if ($treverseTree && $this->getParent() instanceof RouteInterface) {
 				$parentRoutePattern = $this->getParent()->getRoutePattern();
 
-				// Clean up incoming route of $ clauses etc.
+				// Clean up incoming route containing $ clause etc.
 				if (mb_substr($parentRoutePattern, -1) === '$') {
 					$parentRoutePattern = mb_substr($parentRoutePattern, mb_strlen($parentRoutePattern) - 1);
 				}
 
-				if (mb_substr($pattern, 0, 1) === '^') {
+                // Clean up incoming route containing ^ clause etc.
+                if (mb_substr($pattern, 0, 1) === '^') {
 					$pattern = mb_substr($pattern, 1);
 				}
 
@@ -249,6 +252,11 @@ class Route implements RouteInterface, RouteCuttingInterface, RouteStoppingInter
 					$request->setParameter($tokenName, $parameter);
 				}
 			}
+
+            // Cutting of the URI
+            if ($this->cut === true) {
+                $request->setUrl(preg_replace($this->parse($this->routePattern, false), '', $request->getUrl()));
+            }
 
 			return $this;
 		}

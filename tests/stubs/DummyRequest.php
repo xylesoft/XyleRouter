@@ -32,6 +32,12 @@ class DummyRequest implements RequestInterface
         return $this->url;
     }
 
+    public function setUrl($url)
+    {
+        $this->url = $url;
+    }
+
+
     /**
      * Get the GET parameters from the Request.
      *
