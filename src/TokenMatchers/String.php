@@ -52,12 +52,12 @@ class String extends Base
         $withinMax = true;
 
         // Checking minimum length
-        if ($this->options['min'] !== null && mb_strlen($value) < $this->options['min']) {
+        if ($this->options['min'] !== null && mb_strlen($value, "UTF-8") < $this->options['min']) {
             $withinMin = false;
         }
 
         // Checking maximum length.
-        if ($this->options['max'] !== null && mb_strlen($value) > $this->options['max']) {
+        if ($this->options['max'] !== null && mb_strlen($value, "UTF-8") > $this->options['max']) {
             $withinMax = false;
         }
 
